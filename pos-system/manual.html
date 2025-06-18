@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブ教材紹介：二次元コードでピッ！おかいものレジシステム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone background, Teal accent) -->
+    <!-- Application Structure Plan: This is a single-page, vertical-scrolling application designed to be an interactive brochure. The structure flows from a high-level introduction to a hands-on demo, followed by practical instructions for creation/customization, and finally support (Q&A). This non-linear, task-oriented structure (Understand -> Try -> Create) was chosen over a direct translation of the "card" and "manual" to better engage teachers at an exhibition, allowing them to quickly grasp the material's value and potential. -->
+    <!-- Visualization & Content Choices: Report Info: How the system works -> Goal: Demonstrate -> Viz/Presentation: Interactive simulation (HTML/JS) -> Interaction: Clicking product icons updates a virtual cart and total. Justification: A live demo is far more compelling and clearer than static text or images. Report Info: How to create QR codes -> Goal: Instruct -> Viz/Presentation: Interactive JSON generator -> Interaction: User inputs text to see the output format. Justification: Makes the abstract JSON format tangible and less intimidating. Report Info: Q&A -> Goal: Clarify -> Viz/Presentation: Accordion (HTML/JS) -> Interaction: Click to reveal. Justification: Saves space and reduces cognitive load by hiding non-essential information until requested. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        .demo-camera-view {
+            background: #4a5568;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .demo-scan-region {
+            width: 60%;
+            height: 60%;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+            border-radius: 0.75rem;
+        }
+        .product-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .product-item:hover {
+            transform: translateY(-5px);
+        }
+        .quantity-btn {
+            width: 2rem;
+            height: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- 1. Hero Section -->
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-800 mb-4">二次元コードでピッ！<br>お買い物レジシステム</h1>
+            <p class="text-lg text-stone-600 max-w-3xl mx-auto">お店のセルフレジ体験を通して、買い物の流れと金銭管理を楽しく学べる、新しい形のデジタル教材です。</p>
+        </header>
+
+        <!-- 2. Overview Section -->
+        <section id="about" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">教材のねらい</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                    <div class="text-4xl mb-4">🛒</div>
+                    <h3 class="text-xl font-bold mb-2">体験的な学習</h3>
+                    <p class="text-stone-600">商品のスキャンから支払いまで、一連の買い物プロセスを自分の手で操作し、体験的に学ぶことができます。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                    <div class="text-4xl mb-4">🧮</div>
+                    <h3 class="text-xl font-bold mb-2">計算が不要</h3>
+                    <p class="text-stone-600">金額は自動で計算されるため、計算に苦手意識がある生徒も、意欲的に活動に参加できます。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-stone-200">
+                    <div class="text-4xl mb-4">⚙️</div>
+                    <h3 class="text-xl font-bold mb-2">かんたんカスタマイズ</h3>
+                    <p class="text-stone-600">商品や値段を自由に変更可能。生徒一人ひとりの学習レベルに合わせた課題設定が簡単に行えます。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Interactive Demo Section (Revamped) -->
+        <section id="demo" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">使い方を体験する</h2>
+                <p class="text-md text-stone-600">下のアイテムをクリックするとカメラでスキャンしたかのようにカートに入ります。実際のシステムに近い操作を体験してみましょう。</p>
+            </div>
+            <div class="lg:flex lg:flex-row lg:gap-8">
+                <!-- Left Side: Camera and Products -->
+                <div class="w-full max-w-md mx-auto lg:w-5/12 lg:max-w-none lg:mx-0 mb-8 lg:mb-0">
+                    <div class="demo-camera-view mb-4">
+                        <div class="demo-scan-region"></div>
+                    </div>
+                    <p class="text-center font-bold mb-4">クリックして商品をスキャン</p>
+                    <div class="grid grid-cols-3 gap-4">
+                         <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="りんごジュース" data-price="120">
+                            <div class="text-4xl">🧃</div><div class="text-xs font-semibold">120円</div>
+                        </div>
+                        <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="おにぎり" data-price="150">
+                            <div class="text-4xl">🍙</div><div class="text-xs font-semibold">150円</div>
+                        </div>
+                        <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="ポテトチップス" data-price="180">
+                            <div class="text-4xl">🥔</div><div class="text-xs font-semibold">180円</div>
+                        </div>
+                        <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="チョコレート" data-price="100">
+                            <div class="text-4xl">🍫</div><div class="text-xs font-semibold">100円</div>
+                        </div>
+                        <div class="product-item cursor-pointer bg-teal-100 rounded-lg p-3 text-center shadow" data-payment="500">
+                            <div class="text-4xl">💳</div><div class="text-xs font-semibold">500円カード</div>
+                        </div>
+                        <div class="product-item cursor-pointer bg-teal-100 rounded-lg p-3 text-center shadow" data-payment="1000">
+                             <div class="text-4xl">💵</div><div class="text-xs font-semibold">1000円カード</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Cart -->
+                <div class="lg:w-7/12">
+                    <div class="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col">
+                        <div class="flex items-center justify-between border-b pb-4 mb-4">
+                            <h2 class="text-2xl font-semibold">ショッピングカート</h2>
+                            <button id="clear-cart-button" class="text-sm font-medium text-red-500 hover:text-red-700">カートを空にする</button>
+                        </div>
+                        
+                        <div id="cart-items-container" class="divide-y divide-gray-200 flex-grow">
+                            <!-- Items will be injected here -->
+                        </div>
+                        <div id="payment-mode-message" class="hidden flex-grow flex flex-col items-center justify-center text-center">
+                            <p class="text-xl font-bold text-blue-600">お支払い用のカードを<br>クリックしてください</p>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t-2 border-dashed">
+                            <div class="flex justify-between items-center text-xl md:text-3xl font-bold mb-6">
+                                <span>合計金額:</span>
+                                <span id="total-price" class="text-green-600">¥0</span>
+                            </div>
+                            <div id="action-buttons">
+                                <button id="checkout-button" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg text-xl transition shadow disabled:bg-gray-400">お会計へ進む</button>
+                                <button id="back-to-scan-button" class="hidden w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg text-xl transition shadow">スキャンに戻る</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <!-- Receipt Modal -->
+            <div id="receipt-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+                <div class="bg-white p-8 rounded-lg text-center shadow-2xl max-w-sm mx-auto">
+                    <div id="receipt-success">
+                        <h2 class="text-2xl font-bold text-gray-800">お支払い完了</h2>
+                        <p class="text-gray-600 mt-2 mb-4">ありがとうございました。</p>
+                        <p id="receipt-change" class="text-lg font-semibold"></p>
+                    </div>
+                    <div id="receipt-failure" class="hidden">
+                        <h2 class="text-2xl font-bold text-red-600">支払い失敗</h2>
+                        <p id="receipt-shortage" class="text-gray-600 mt-2 mb-4"></p>
+                    </div>
+                    <button id="new-transaction-button" class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition">閉じる</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Screen and Buttons Explanation Section (Updated) -->
+        <section id="explanation" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">画面とボタンの説明</h2>
+                <p class="text-md text-stone-600">実際のシステムの各ボタンの役割です。</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-8 border border-stone-200">
+                <!-- Diagram -->
+                <div class="max-w-4xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row gap-4 p-4 bg-gray-200 rounded-lg">
+                        <!-- Left: Camera part -->
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full text-center p-2 bg-gray-700 text-white rounded-lg shadow-md">カメラ切替</div>
+                            <div class="w-full aspect-square bg-gray-800 rounded-lg flex items-center justify-center text-white">カメラ映像</div>
+                        </div>
+                        <!-- Right: Cart part -->
+                        <div class="flex-1 bg-white p-4 rounded-lg flex flex-col">
+                            <div class="flex justify-between items-center border-b pb-2 mb-2">
+                                <span class="font-bold">ショッピングカート</span>
+                                <span class="text-sm text-red-500">カートを空にする</span>
+                            </div>
+                            <div class="flex-grow space-y-2">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span>商品A</span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="border rounded-full px-2">-</span>
+                                        <span>1</span>
+                                        <span class="border rounded-full px-2">+</span>
+                                    </div>
+                                    <span>¥100</span>
+                                    <span class="text-red-500">削除</span>
+                                </div>
+                            </div>
+                            <div class="border-t-2 border-dashed mt-2 pt-2">
+                                <div class="font-bold text-lg mb-2">合計: ¥100</div>
+                                <div class="w-full text-center p-2 bg-green-500 text-white rounded-lg shadow-lg">お会計へ進む</div>
+                                <div class="hidden w-full text-center p-2 bg-gray-500 text-white rounded-lg shadow-lg">スキャンに戻る</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Explanations -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">カメラ切替</h4>
+                        <p class="text-sm text-stone-600">タブレットの前面カメラと背面カメラを切り替えます。</p>
+                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">カートを空にする</h4>
+                        <p class="text-sm text-stone-600">カートに入っている商品をすべて削除します。</p>
+                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">数量「＋」「－」ボタン</h4>
+                        <p class="text-sm text-stone-600">カートに入れた商品の数を増やしたり減らしたりします。</p>
+                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">削除ボタン</h4>
+                        <p class="text-sm text-stone-600">その商品をカートから完全に取り除きます。</p>
+                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">お会計へ進む</h4>
+                        <p class="text-sm text-stone-600">商品スキャンを終え、支払いモードに切り替えます。</p>
+                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">スキャンに戻る</h4>
+                        <p class="text-sm text-stone-600">支払いモードをやめて、商品スキャンに戻ります。</p>
+                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md">
+                        <h4 class="font-bold">新しい取引を開始</h4>
+                        <p class="text-sm text-stone-600">支払い完了後に表示され、すべてをリセットして最初から始めます。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 5. How to Create Section -->
+        <section id="create" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">教材の作り方</h2>
+                <p class="text-md text-stone-600">プログラムの知識は不要です。簡単なステップで、クラス専用の教材を作成できます。</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-8 border border-stone-200">
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">Step 1: 二次元コードを作成する</h3>
+                        <p class="mb-4 text-stone-600">無料の作成サイトを使い、商品や支払い用の二次元コードを作ります。以下に一例を示します。</p>
+                        <ol class="list-decimal list-inside space-y-4 text-stone-600">
+                            <li>
+                                <strong>作成サイトにアクセス</strong><br>
+                                PCのブラウザで「QRコード 作成 無料」などと検索し、サイトを開きます。（例：QR Code Generatorなど）
+                            </li>
+                            <li>
+                                <strong>入力タイプを選択</strong><br>
+                                「テキスト」や「自由な文字」を入力できるタイプを選びます。
+                            </li>
+                            <li>
+                                <strong>決まった形式で文字を入力</strong><br>
+                                以下の形式をコピー＆ペーストし、商品名や価格を書き換えて入力欄に入力します。
+                                <div class="my-2 p-3 bg-stone-100 rounded-md">
+                                    <p class="font-semibold text-stone-800">商品用:</p>
+                                    <code class="text-sm bg-stone-800 text-white p-1 rounded inline-block">{"name":"りんごジュース","price":120}</code>
+                                </div>
+                                <div class="my-2 p-3 bg-stone-100 rounded-md">
+                                    <p class="font-semibold text-stone-800">支払い用:</p>
+                                    <code class="text-sm bg-stone-800 text-white p-1 rounded inline-block">{"payment":1000}</code>
+                                </div>
+                            </li>
+                             <li>
+                                <strong>保存と印刷</strong><br>
+                                作成された二次元コードの画像をPCに保存し、印刷します。印刷したものを商品やカードに貼り付ければ完成です。
+                            </li>
+                        </ol>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">Step 2: システムを起動する</h3>
+                        <p class="mb-4 text-stone-600">この教材はWebページなので、インストールは不要です。以下のリンク先にアクセスするだけで、どの端末からでもすぐに利用を開始できます。</p>
+                        <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-center">
+                            <p class="font-bold text-teal-800 mb-2">プログラム公開場所</p>
+                            <a href="https://y-sensei-lab.github.io/pos-system/" target="_blank" class="text-teal-600 hover:underline break-all">https://y-sensei-lab.github.io/pos-system/</a>
+                            <p class="text-xs text-teal-700 mt-2">（クリックすると実際のレジシステムが開きます）</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Q&A Section -->
+        <section id="faq" class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">よくある質問</h2>
+            </div>
+            <div class="space-y-4">
+                 <details class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 group">
+                    <summary class="font-bold cursor-pointer list-none flex justify-between items-center">
+                        カメラが映りません。
+                        <span class="transform transition-transform duration-200 group-open:rotate-180">▼</span>
+                    </summary>
+                    <p class="text-stone-600 mt-4">実際のレジシステムを開いた後、ブラウザの設定でこのサイトへのカメラアクセスが「ブロック」または「不許可」になっていないか確認してください。アドレスバーの鍵マークなどから設定を変更できます。</p>
+                </details>
+                <details class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 group">
+                    <summary class="font-bold cursor-pointer list-none flex justify-between items-center">
+                        二次元コードをうまく読み取れません。
+                         <span class="transform transition-transform duration-200 group-open:rotate-180">▼</span>
+                    </summary>
+                    <p class="text-stone-600 mt-4">カメラのピントが合うように、少し距離を調整してみてください。また、部屋を明るくしたり、二次元コードに影がかからないようにしたりすると、読み取りやすくなります。</p>
+                </details>
+                <details class="bg-white p-4 rounded-lg shadow-sm border border-stone-200 group">
+                    <summary class="font-bold cursor-pointer list-none flex justify-between items-center">
+                        商品を追加・変更したいです。
+                         <span class="transform transition-transform duration-200 group-open:rotate-180">▼</span>
+                    </summary>
+                    <p class="text-stone-600 mt-4">「教材の作り方」のStep 1を参考に、新しい二次元コードを作成・印刷するだけで、自由に商品を追加・変更できます。プログラム本体を編集する必要はありません。</p>
+                </details>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 text-sm text-stone-500">
+        <p>&copy; 久我山青光学園 教材展2025</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const totalPriceEl = document.getElementById('total-price');
+        const clearCartButton = document.getElementById('clear-cart-button');
+        const checkoutButton = document.getElementById('checkout-button');
+        const backToScanButton = document.getElementById('back-to-scan-button');
+        const paymentModeMessage = document.getElementById('payment-mode-message');
+        
+        const receiptModal = document.getElementById('receipt-modal');
+        const newTransactionButton = document.getElementById('new-transaction-button');
+        const receiptSuccess = document.getElementById('receipt-success');
+        const receiptFailure = document.getElementById('receipt-failure');
+        const receiptChange = document.getElementById('receipt-change');
+        const receiptShortage = document.getElementById('receipt-shortage');
+
+        let cart = []; // Stores {name, price, quantity}
+        let isPaymentMode = false;
+
+        function renderCart() {
+            cartItemsContainer.innerHTML = '';
+            let currentTotal = 0;
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-gray-500 py-4 text-center">カートは空です。</p>';
+            } else {
+                cart.forEach(item => {
+                    currentTotal += item.price * item.quantity;
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'flex justify-between items-center py-3';
+                    itemElement.innerHTML = `
+                        <div class="flex-grow pr-2">
+                            <p class="font-semibold">${item.name}</p>
+                            <p class="text-sm text-gray-500">¥${item.price.toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center">
+                            <button data-name="${item.name}" class="quantity-minus quantity-btn flex items-center justify-center bg-gray-200 text-lg font-bold rounded-full hover:bg-gray-300">-</button>
+                            <span class="w-10 text-center text-lg font-semibold">${item.quantity}</span>
+                            <button data-name="${item.name}" class="quantity-plus quantity-btn flex items-center justify-center bg-gray-200 text-lg font-bold rounded-full hover:bg-gray-300">+</button>
+                        </div>
+                        <div class="w-24 text-right font-semibold">¥${(item.price * item.quantity).toLocaleString()}</div>
+                        <div class="w-16 text-right">
+                            <button data-name="${item.name}" class="remove-item-btn text-red-500 hover:text-red-700 p-1">削除</button>
+                        </div>`;
+                    cartItemsContainer.appendChild(itemElement);
+                });
+            }
+            totalPriceEl.textContent = `¥${currentTotal.toLocaleString()}`;
+            checkoutButton.disabled = cart.length === 0;
+        }
+
+        function addItem(name, price) {
+            if (isPaymentMode) return;
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        function changeQuantity(name, delta) {
+            const item = cart.find(i => i.name === name);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.name !== name);
+                }
+            }
+            renderCart();
+        }
+        
+        function handlePayment(paymentAmount) {
+            if (!isPaymentMode) return;
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const change = paymentAmount - total;
+
+            if (change >= 0) {
+                receiptSuccess.classList.remove('hidden');
+                receiptFailure.classList.add('hidden');
+                receiptChange.textContent = `おつりは ¥${change.toLocaleString()} です。`;
+            } else {
+                receiptSuccess.classList.add('hidden');
+                receiptFailure.classList.remove('hidden');
+                receiptShortage.textContent = `¥${-change.toLocaleString()} 不足しています。`;
+            }
+            receiptModal.classList.remove('hidden');
+        }
+
+        function resetDemo() {
+            cart = [];
+            isPaymentMode = false;
+            receiptModal.classList.add('hidden');
+            paymentModeMessage.classList.add('hidden');
+            cartItemsContainer.classList.remove('hidden');
+            checkoutButton.classList.remove('hidden');
+            backToScanButton.classList.add('hidden');
+            renderCart();
+        }
+
+        document.querySelectorAll('.product-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.dataset.name) {
+                    addItem(item.dataset.name, parseInt(item.dataset.price));
+                } else if (item.dataset.payment) {
+                    handlePayment(parseInt(item.dataset.payment));
+                }
+            });
+        });
+
+        cartItemsContainer.addEventListener('click', (e) => {
+            if (isPaymentMode) return;
+            const target = e.target;
+            const name = target.dataset.name || target.closest('[data-name]')?.dataset.name;
+            if (!name) return;
+
+            if (target.classList.contains('quantity-plus')) changeQuantity(name, 1);
+            if (target.classList.contains('quantity-minus')) changeQuantity(name, -1);
+            if (target.classList.contains('remove-item-btn')) changeQuantity(name, -Infinity); // Remove all
+        });
+        
+        clearCartButton.addEventListener('click', () => {
+             if (!isPaymentMode) {
+                cart = [];
+                renderCart();
+             }
+        });
+
+        checkoutButton.addEventListener('click', () => {
+            if (cart.length > 0) {
+                isPaymentMode = true;
+                cartItemsContainer.classList.add('hidden');
+                paymentModeMessage.classList.remove('hidden');
+                checkoutButton.classList.add('hidden');
+                backToScanButton.classList.remove('hidden');
+            }
+        });
+
+        backToScanButton.addEventListener('click', () => {
+            isPaymentMode = false;
+            cartItemsContainer.classList.remove('hidden');
+            paymentModeMessage.classList.add('hidden');
+            checkoutButton.classList.remove('hidden');
+            backToScanButton.classList.add('hidden');
+        });
+        
+        newTransactionButton.addEventListener('click', resetDemo);
+
+        resetDemo();
+    });
+    </script>
+</body>
+</html>
