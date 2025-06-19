@@ -21,7 +21,8 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8">
+    <!-- メインコンテナに下方向のパディング(pb-16)を追加してスクロール問題を解消 -->
+    <div class="container mx-auto p-4 md:p-8 pb-16">
         <header class="text-center mb-10">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">二次元コード簡単作成サイト</h1>
             <p class="mt-2 text-gray-600">商品用・支払い用の二次元コードを生成します。</p>
@@ -40,27 +41,28 @@
                     <h2 class="text-2xl font-bold text-gray-800">商品用二次元コード</h2>
                 </div>
                 <div class="w-full">
-                    <!-- 商品名入力 -->
+                    <!-- 入力フォーム -->
                     <div class="mb-4">
                         <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">商品名</label>
                         <input type="text" id="productName" placeholder="例: りんごジュース" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-                    <!-- 価格入力 -->
                     <div class="mb-4">
                         <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-1">価格（円）</label>
                         <input type="text" id="productPrice" inputmode="numeric" placeholder="例: 120" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-                     <!-- エラーメッセージ表示エリア -->
                     <div id="productError" class="text-red-500 text-sm h-5 mb-2"></div>
-                    <!-- 生成ボタン -->
-                    <button id="generateProductQR" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                        生成する
-                    </button>
+                    <button id="generateProductQR" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">生成する</button>
                 </div>
-                <!-- 生成された二次元コードの表示エリア -->
-                <div id="productQRContainer" class="mt-6 text-center">
-                    <canvas id="productQRCanvas"></canvas>
-                    <a id="downloadProductQR" class="hidden mt-4 inline-block bg-green-500 text-white font-bold py-2 px-5 rounded-md hover:bg-green-600 transition-colors duration-300">ダウンロード</a>
+                <!-- 二次元コード表示エリア -->
+                <div class="w-full mt-6 text-center">
+                    <div id="productQRContainer" class="w-[200px] h-[200px] mx-auto bg-gray-50 rounded-lg border-2 border-dashed flex justify-center items-center">
+                        <div id="productPlaceholder" class="text-gray-400 text-center">
+                            <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <p class="text-xs">ここに表示されます</p>
+                        </div>
+                        <canvas id="productQRCanvas" class="hidden"></canvas>
+                    </div>
+                    <a id="downloadProductQR" class="mt-4 inline-block font-bold py-2 px-5 rounded-md transition-colors duration-300 bg-gray-400 text-white cursor-not-allowed pointer-events-none">ダウンロード</a>
                 </div>
             </div>
 
@@ -74,22 +76,24 @@
                     <h2 class="text-2xl font-bold text-gray-800">支払い用二次元コード</h2>
                 </div>
                 <div class="w-full">
-                    <!-- 支払い金額入力 -->
+                    <!-- 入力フォーム -->
                     <div class="mb-4">
                         <label for="paymentAmount" class="block text-sm font-medium text-gray-700 mb-1">支払い金額（円）</label>
                         <input type="text" id="paymentAmount" inputmode="numeric" placeholder="例: 1000" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
-                     <!-- エラーメッセージ表示エリア -->
                     <div id="paymentError" class="text-red-500 text-sm h-5 mb-2"></div>
-                    <!-- 生成ボタン -->
-                    <button id="generatePaymentQR" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                        生成する
-                    </button>
+                    <button id="generatePaymentQR" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">生成する</button>
                 </div>
-                <!-- 生成された二次元コードの表示エリア -->
-                <div id="paymentQRContainer" class="mt-6 text-center">
-                    <canvas id="paymentQRCanvas"></canvas>
-                    <a id="downloadPaymentQR" class="hidden mt-4 inline-block bg-green-500 text-white font-bold py-2 px-5 rounded-md hover:bg-green-600 transition-colors duration-300">ダウンロード</a>
+                 <!-- 二次元コード表示エリア -->
+                 <div class="w-full mt-6 text-center">
+                    <div id="paymentQRContainer" class="w-[200px] h-[200px] mx-auto bg-gray-50 rounded-lg border-2 border-dashed flex justify-center items-center">
+                        <div id="paymentPlaceholder" class="text-gray-400 text-center">
+                            <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <p class="text-xs">ここに表示されます</p>
+                        </div>
+                        <canvas id="paymentQRCanvas" class="hidden"></canvas>
+                    </div>
+                    <a id="downloadPaymentQR" class="mt-4 inline-block font-bold py-2 px-5 rounded-md transition-colors duration-300 bg-gray-400 text-white cursor-not-allowed pointer-events-none">ダウンロード</a>
                 </div>
             </div>
 
@@ -99,70 +103,83 @@
     <script>
         /**
          * 全角英数字を半角に変換する関数
-         * @param {string} str 変換したい文字列
-         * @returns {string} 半角に変換された文字列
          */
         function convertToHalfWidth(str) {
             if (!str) return '';
-            return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(s) {
-                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-            });
+            return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+        }
+
+        /**
+         * ファイル名として安全な文字列に変換する関数
+         */
+        function sanitizeFilename(name) {
+            return name.replace(/[\\/:*?"<>|]/g, '_').slice(0, 30);
         }
 
         /**
          * エラーメッセージを表示する関数
-         * @param {string} elementId メッセージを表示する要素のID
-         * @param {string} message 表示するメッセージ
          */
         function displayError(elementId, message) {
             const errorEl = document.getElementById(elementId);
             errorEl.textContent = message;
-            // 3秒後にメッセージを消去
-            setTimeout(() => {
-                errorEl.textContent = '';
-            }, 3000);
+            setTimeout(() => { errorEl.textContent = ''; }, 3000);
+        }
+        
+        /**
+         * ダウンロードボタンの状態を更新する関数
+         */
+        function updateDownloadButton(linkId, enabled) {
+            const link = document.getElementById(linkId);
+            if (enabled) {
+                link.classList.remove('bg-gray-400', 'cursor-not-allowed', 'pointer-events-none');
+                link.classList.add('bg-green-500', 'hover:bg-green-600');
+            } else {
+                link.classList.add('bg-gray-400', 'cursor-not-allowed', 'pointer-events-none');
+                link.classList.remove('bg-green-500', 'hover:bg-green-600');
+                link.href = '#'; // 無効なリンクに設定
+            }
         }
 
         /**
          * 二次元コードを生成し、表示する共通関数
-         * @param {string} canvasId 二次元コードを描画するcanvasのID
-         * @param {string} downloadLinkId ダウンロードリンクのID
-         * @param {object} jsonData 二次元コードに含めるJSONデータ
-         * @param {string} errorElementId エラー表示用の要素ID
          */
-        function generateQRCode(canvasId, downloadLinkId, jsonData, errorElementId) {
+        function generateQRCode(placeholderId, canvasId, downloadLinkId, jsonData, errorElementId, filename) {
+            const placeholder = document.getElementById(placeholderId);
             const canvas = document.getElementById(canvasId);
-            const downloadLink = document.getElementById(downloadLinkId);
             const jsonString = JSON.stringify(jsonData);
+
+            // 生成前にUIをリセット
+            placeholder.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            updateDownloadButton(downloadLinkId, false);
 
             QRCode.toCanvas(canvas, jsonString, {
                 width: 200,
-                margin: 2, // 二次元コードの周りの余白
-                errorCorrectionLevel: 'H', // 誤り訂正レベル
-                color: {
-                    dark: '#333333', // 二次元コードの色
-                    light: '#FFFFFF'  // 背景色
-                }
+                margin: 2,
+                errorCorrectionLevel: 'H',
+                color: { dark: '#333333', light: '#FFFFFF' }
             }, function (error) {
                 if (error) {
                     console.error(error);
                     displayError(errorElementId, '二次元コードの生成に失敗しました。');
+                    // エラー時はプレースホルダーを再表示
+                    placeholder.classList.remove('hidden');
+                    canvas.classList.add('hidden');
                     return;
                 }
                 console.log('二次元コードが正常に生成されました！');
+                const downloadLink = document.getElementById(downloadLinkId);
                 downloadLink.href = canvas.toDataURL('image/png');
-                downloadLink.download = `${Object.keys(jsonData)[0]}-2d-code.png`;
-                downloadLink.classList.remove('hidden'); // ダウンロードリンクを表示
+                downloadLink.download = filename;
+                updateDownloadButton(downloadLinkId, true); // ボタンを有効化
             });
         }
 
         // --- 商品用二次元コードのイベントリスナー ---
         document.getElementById('generateProductQR').addEventListener('click', () => {
             const name = document.getElementById('productName').value;
-            // 全角数字を半角に変換
             const priceStr = convertToHalfWidth(document.getElementById('productPrice').value);
             
-            // 入力値のバリデーション
             if (!name.trim()) {
                 displayError('productError', '商品名を入力してください。');
                 return;
@@ -172,30 +189,23 @@
                 return;
             }
 
-            const productData = {
-                name: name,
-                price: parseInt(priceStr, 10) // 数値に変換
-            };
-
-            generateQRCode('productQRCanvas', 'downloadProductQR', productData, 'productError');
+            const productData = { name: name, price: parseInt(priceStr, 10) };
+            const filename = `商品_${sanitizeFilename(name)}_${priceStr}円.png`;
+            generateQRCode('productPlaceholder', 'productQRCanvas', 'downloadProductQR', productData, 'productError', filename);
         });
 
         // --- 支払い用二次元コードのイベントリスナー ---
         document.getElementById('generatePaymentQR').addEventListener('click', () => {
-            // 全角数字を半角に変換
             const amountStr = convertToHalfWidth(document.getElementById('paymentAmount').value);
 
-            // 入力値のバリデーション
             if (!amountStr.trim() || isNaN(amountStr)) {
                 displayError('paymentError', '有効な金額を入力してください。');
                 return;
             }
 
-            const paymentData = {
-                payment: parseInt(amountStr, 10) // 数値に変換
-            };
-
-            generateQRCode('paymentQRCanvas', 'downloadPaymentQR', paymentData, 'paymentError');
+            const paymentData = { payment: parseInt(amountStr, 10) };
+            const filename = `支払い_${amountStr}円.png`;
+            generateQRCode('paymentPlaceholder', 'paymentQRCanvas', 'downloadPaymentQR', paymentData, 'paymentError', filename);
         });
     </script>
 
