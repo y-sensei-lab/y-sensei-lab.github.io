@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>インタラクティブ教材紹介：二次元コードでピッ！おかいものレジシステム</title>
+    <title>インタラクティブ教材紹介：二次元コードでピッ！買い物レジシステム</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals (Stone background, Teal accent) -->
-    <!-- Application Structure Plan: This is a single-page, vertical-scrolling application designed to be an interactive brochure. The structure flows from a high-level introduction to a hands-on demo, followed by practical instructions for creation/customization, and finally support (Q&A). This non-linear, task-oriented structure (Understand -> Try -> Create) was chosen over a direct translation of the "card" and "manual" to better engage teachers at an exhibition, allowing them to quickly grasp the material's value and potential. -->
-    <!-- Visualization & Content Choices: Report Info: How the system works -> Goal: Demonstrate -> Viz/Presentation: Interactive simulation (HTML/JS) -> Interaction: Clicking product icons updates a virtual cart and total. Justification: A live demo is far more compelling and clearer than static text or images. Report Info: How to create QR codes -> Goal: Instruct -> Viz/Presentation: Interactive JSON generator -> Interaction: User inputs text to see the output format. Justification: Makes the abstract JSON format tangible and less intimidating. Report Info: Q&A -> Goal: Clarify -> Viz/Presentation: Accordion (HTML/JS) -> Interaction: Click to reveal. Justification: Saves space and reduces cognitive load by hiding non-essential information until requested. -->
+    <!-- Application Structure Plan: A single-page, vertical-scrolling application designed as an interactive brochure for teachers at an exhibition. The structure follows a logical user journey: 1. Hook (What is it?), 2. Aims (Why use it?), 3. Interactive Demo (How does it feel?), 4. UI Explanation (How does it look?), 5. Creation Guide (How do I make my own?), and 6. FAQ (Support). This task-oriented flow (Understand -> Try -> Create) is more engaging and effective for the target audience than a direct translation of the source documents. -->
+    <!-- Visualization & Content Choices: Report Info: Core concept -> Goal: Hook user -> Viz/Method: Large, clear headline. Report Info: Educational Aims -> Goal: Inform -> Viz/Method: Icon-based feature cards (HTML/Unicode/Tailwind). Interaction: None. Justification: Quickly conveys value propositions. Report Info: How the system works -> Goal: Demonstrate -> Viz/Method: Interactive simulation (HTML/JS). Interaction: Clicking product icons updates a virtual cart and total. Justification: A live demo is far more compelling than static text. Report Info: How to create materials -> Goal: Instruct -> Viz/Method: Step-by-step guide referencing the dedicated 'qr_generator.html'. Interaction: None. Justification: Provides clear, actionable steps for teachers to prepare their own materials. Report Info: Q&A -> Goal: Clarify -> Viz/Method: Native HTML accordion (<details>). Interaction: Click to reveal. Justification: Saves space and reduces cognitive load. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -51,7 +51,7 @@
 
         <!-- 1. Hero Section -->
         <header class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl font-bold text-teal-800 mb-4">二次元コードでピッ！<br>お買い物レジシステム</h1>
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-800 mb-4">二次元コードでピッ！<br>買い物レジシステム</h1>
             <p class="text-lg text-stone-600 max-w-3xl mx-auto">お店のセルフレジ体験を通して、買い物の流れと金銭管理を楽しく学べる、新しい形のデジタル教材です。</p>
         </header>
 
@@ -79,7 +79,7 @@
             </div>
         </section>
 
-        <!-- 3. Interactive Demo Section (Revamped) -->
+        <!-- 3. Interactive Demo Section -->
         <section id="demo" class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-2">使い方を体験する</h2>
@@ -159,22 +159,19 @@
             </div>
         </section>
 
-        <!-- 4. Screen and Buttons Explanation Section (Updated) -->
+        <!-- 4. Screen and Buttons Explanation Section -->
         <section id="explanation" class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-2">画面とボタンの説明</h2>
                 <p class="text-md text-stone-600">実際のシステムの各ボタンの役割です。</p>
             </div>
             <div class="bg-white rounded-xl shadow-lg p-4 md:p-8 border border-stone-200">
-                <!-- Diagram -->
                 <div class="max-w-4xl mx-auto mb-8">
                     <div class="flex flex-col md:flex-row gap-4 p-4 bg-gray-200 rounded-lg">
-                        <!-- Left: Camera part -->
                         <div class="flex-1 flex flex-col items-center gap-2">
                             <div class="w-full text-center p-2 bg-gray-700 text-white rounded-lg shadow-md">カメラ切替</div>
                             <div class="w-full aspect-square bg-gray-800 rounded-lg flex items-center justify-center text-white">カメラ映像</div>
                         </div>
-                        <!-- Right: Cart part -->
                         <div class="flex-1 bg-white p-4 rounded-lg flex flex-col">
                             <div class="flex justify-between items-center border-b pb-2 mb-2">
                                 <span class="font-bold">ショッピングカート</span>
@@ -200,86 +197,45 @@
                         </div>
                     </div>
                 </div>
-                <!-- Explanations -->
                 <div class="grid md:grid-cols-2 gap-4">
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">カメラ切替</h4>
-                        <p class="text-sm text-stone-600">タブレットの前面カメラと背面カメラを切り替えます。</p>
-                    </div>
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">カートを空にする</h4>
-                        <p class="text-sm text-stone-600">カートに入っている商品をすべて削除します。</p>
-                    </div>
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">数量「＋」「－」ボタン</h4>
-                        <p class="text-sm text-stone-600">カートに入れた商品の数を増やしたり減らしたりします。</p>
-                    </div>
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">削除ボタン</h4>
-                        <p class="text-sm text-stone-600">その商品をカートから完全に取り除きます。</p>
-                    </div>
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">お会計へ進む</h4>
-                        <p class="text-sm text-stone-600">商品スキャンを終え、支払いモードに切り替えます。</p>
-                    </div>
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">スキャンに戻る</h4>
-                        <p class="text-sm text-stone-600">支払いモードをやめて、商品スキャンに戻ります。</p>
-                    </div>
-                    <div class="p-3 bg-stone-100 rounded-md">
-                        <h4 class="font-bold">新しい取引を開始</h4>
-                        <p class="text-sm text-stone-600">支払い完了後に表示され、すべてをリセットして最初から始めます。</p>
-                    </div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">カメラ切替</h4><p class="text-sm text-stone-600">タブレットの前面カメラと背面カメラを切り替えます。</p></div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">カートを空にする</h4><p class="text-sm text-stone-600">カートに入っている商品をすべて削除します。</p></div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">数量「＋」「－」ボタン</h4><p class="text-sm text-stone-600">カートに入れた商品の数を増やしたり減らしたりします。</p></div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">削除ボタン</h4><p class="text-sm text-stone-600">その商品をカートから完全に取り除きます。</p></div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">お会計へ進む</h4><p class="text-sm text-stone-600">商品スキャンを終え、支払いモードに切り替えます。</p></div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">スキャンに戻る</h4><p class="text-sm text-stone-600">支払いモードをやめて、商品スキャンに戻ります。</p></div>
+                    <div class="p-3 bg-stone-100 rounded-md"><h4 class="font-bold">新しい取引を開始</h4><p class="text-sm text-stone-600">支払い完了後に表示され、すべてをリセットして最初から始めます。</p></div>
                 </div>
             </div>
         </section>
-
 
         <!-- 5. How to Create Section -->
         <section id="create" class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-2">教材の作り方</h2>
-                <p class="text-md text-stone-600">プログラムの知識は不要です。簡単なステップで、クラス専用の教材を作成できます。</p>
+                <p class="text-md text-stone-600">専用サイトを使えば、プログラムの知識は不要です。簡単なステップで、クラス専用の教材を作成できます。</p>
             </div>
             <div class="bg-white rounded-xl shadow-lg p-4 md:p-8 border border-stone-200">
                 <div class="grid md:grid-cols-2 gap-12 items-start">
                     <div>
-                        <h3 class="text-2xl font-bold mb-4">Step 1: 二次元コードを作成する</h3>
-                        <p class="mb-4 text-stone-600">無料の作成サイトを使い、商品や支払い用の二次元コードを作ります。以下に一例を示します。</p>
-                        <ol class="list-decimal list-inside space-y-4 text-stone-600">
-                            <li>
-                                <strong>作成サイトにアクセス</strong><br>
-                                PCのブラウザで「QRコード 作成 無料」などと検索し、サイトを開きます。（例：QR Code Generatorなど）
-                            </li>
-                            <li>
-                                <strong>入力タイプを選択</strong><br>
-                                「テキスト」や「自由な文字」を入力できるタイプを選びます。
-                            </li>
-                            <li>
-                                <strong>決まった形式で文字を入力</strong><br>
-                                以下の形式をコピー＆ペーストし、商品名や価格を書き換えて入力欄に入力します。
-                                <div class="my-2 p-3 bg-stone-100 rounded-md">
-                                    <p class="font-semibold text-stone-800">商品用:</p>
-                                    <code class="text-sm bg-stone-800 text-white p-1 rounded inline-block">{"name":"りんごジュース","price":120}</code>
-                                </div>
-                                <div class="my-2 p-3 bg-stone-100 rounded-md">
-                                    <p class="font-semibold text-stone-800">支払い用:</p>
-                                    <code class="text-sm bg-stone-800 text-white p-1 rounded inline-block">{"payment":1000}</code>
-                                </div>
-                            </li>
-                             <li>
-                                <strong>保存と印刷</strong><br>
-                                作成された二次元コードの画像をPCに保存し、印刷します。印刷したものを商品やカードに貼り付ければ完成です。
-                            </li>
+                        <h3 class="text-2xl font-bold mb-4">Step 1: 専用サイトでコードを作成</h3>
+                        <p class="mb-4 text-stone-600">専用の二次元コード作成サイトを開き、教材で使う商品や支払い用のコードを作ります。</p>
+                        <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-center mb-6">
+                            <p class="font-bold text-teal-800 mb-2">二次元コード生成</p>
+                            <a href="https://y-sensei-lab.github.io/pos-system/qr_generator.html" target="_blank" class="text-teal-600 hover:underline break-all">https://y-sensei-lab.github.io/pos-system/qr_generator.html</a>
+                        </div>
+                        <ol class="list-decimal list-inside space-y-2 text-stone-600">
+                            <li>サイトを開き、「商品用」または「支払い用」に必要な情報を入力します。</li>
+                            <li>`生成する`ボタンを押し、表示された二次元コードを確認します。</li>
+                            <li>`ダウンロード`ボタンで画像を保存し、印刷して活用します。</li>
                         </ol>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold mb-4">Step 2: システムを起動する</h3>
-                        <p class="mb-4 text-stone-600">この教材はWebページなので、インストールは不要です。以下のリンク先にアクセスするだけで、どの端末からでもすぐに利用を開始できます。</p>
+                        <h3 class="text-2xl font-bold mb-4">Step 2: レジシステムを起動する</h3>
+                        <p class="mb-4 text-stone-600">準備した二次元コードを使って、レジシステムで買い物学習を始めます。インストールは不要です。</p>
                         <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-center">
-                            <p class="font-bold text-teal-800 mb-2">プログラム公開場所</p>
+                            <p class="font-bold text-teal-800 mb-2">レジシステム</p>
                             <a href="https://y-sensei-lab.github.io/pos-system/" target="_blank" class="text-teal-600 hover:underline break-all">https://y-sensei-lab.github.io/pos-system/</a>
-                            <p class="text-xs text-teal-700 mt-2">（クリックすると実際のレジシステムが開きます）</p>
                         </div>
                     </div>
                 </div>
@@ -311,7 +267,7 @@
                         商品を追加・変更したいです。
                          <span class="transform transition-transform duration-200 group-open:rotate-180">▼</span>
                     </summary>
-                    <p class="text-stone-600 mt-4">「教材の作り方」のStep 1を参考に、新しい二次元コードを作成・印刷するだけで、自由に商品を追加・変更できます。プログラム本体を編集する必要はありません。</p>
+                    <p class="text-stone-600 mt-4">「教材の作り方」のStep 1を参考に、専用の二次元コード作成サイトを使って、新しいコードを作成・印刷するだけで、自由に商品を追加・変更できます。プログラム本体を編集する必要はありません。</p>
                 </details>
             </div>
         </section>
@@ -457,7 +413,7 @@
                 cartItemsContainer.classList.add('hidden');
                 paymentModeMessage.classList.remove('hidden');
                 checkoutButton.classList.add('hidden');
-                backToScanButton.classList.remove('hidden');
+                backToScanButton.classList.add('hidden');
             }
         });
 
