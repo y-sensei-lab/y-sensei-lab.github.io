@@ -55,13 +55,11 @@
             <h2 class="text-xl font-bold mb-4 text-orange-600">1. 画像を選ぶ</h2>
             <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>同じ画像が2枚で1ペアになります。</p>
             <div class="grid md:grid-cols-2 gap-4">
-                <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
-                <label for="folder-input" class="w-full bg-teal-400 hover:bg-teal-500 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                <label for="folder-input" class="w-full bg-sky-400 hover:bg-sky-500 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                     <span>フォルダを選択 (まとめて)</span>
                 </label>
                 <input type="file" id="folder-input" webkitdirectory directory multiple>
 
-                <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
                 <label for="files-input" class="w-full bg-sky-400 hover:bg-sky-500 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                     <span>画像を1枚ずつ選択</span>
                 </label>
@@ -79,11 +77,9 @@
                 むずかしい: 全部うら面から
             </p>
             <div class="flex justify-center gap-4">
-                 <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
                 <button id="easy-mode-btn" data-difficulty="easy" class="difficulty-btn w-1/2 bg-lime-500 hover:bg-lime-600 text-white font-bold p-2 rounded-xl shadow-md transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                     かんたん
                 </button>
-                 <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
                 <button id="hard-mode-btn" data-difficulty="hard" class="difficulty-btn w-1/2 bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-xl shadow-md transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                     むずかしい
                 </button>
@@ -119,17 +115,17 @@
     
     <!-- ========== 音量調整 ========== -->
     <div class="absolute bottom-4 left-4">
-        <button id="volume-settings-btn" class="w-14 h-14 flex items-center justify-center bg-pink-400 hover:bg-pink-500 text-white font-bold rounded-full shadow-lg transition-transform transform hover:scale-105">
+        <button id="volume-settings-btn" class="w-14 h-14 flex items-center justify-center bg-sky-400 hover:bg-sky-500 text-white font-bold rounded-full shadow-lg transition-transform transform hover:scale-105">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
         </button>
-        <div id="volume-controls" class="hidden absolute bottom-20 left-0 bg-white p-4 rounded-2xl shadow-2xl border-2 border-pink-200 w-64">
+        <div id="volume-controls" class="hidden absolute bottom-20 left-0 bg-white p-4 rounded-2xl shadow-2xl border-2 border-sky-200 w-64">
             <div class="mb-4">
                 <label for="bgm-volume" class="block text-sm font-bold text-gray-700">BGM</label>
-                <input type="range" id="bgm-volume" min="0" max="1" step="0.01" class="w-full h-2 bg-pink-100 rounded-lg appearance-none cursor-pointer">
+                <input type="range" id="bgm-volume" min="0" max="1" step="0.01" class="w-full h-2 bg-sky-100 rounded-lg appearance-none cursor-pointer">
             </div>
             <div>
                 <label for="sfx-volume" class="block text-sm font-bold text-gray-700">効果音</label>
-                <input type="range" id="sfx-volume" min="0" max="1" step="0.01" class="w-full h-2 bg-pink-100 rounded-lg appearance-none cursor-pointer">
+                <input type="range" id="sfx-volume" min="0" max="1" step="0.01" class="w-full h-2 bg-sky-100 rounded-lg appearance-none cursor-pointer">
             </div>
         </div>
     </div>
@@ -419,7 +415,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleMatch = () => {
-        playSfx(sfx.pair);
+        // ★★★ 修正点: 難易度に応じて音の遅延を変更 ★★★
+        const sfxDelay = difficulty === 'hard' ? 800 : 500;
+        setTimeout(() => {
+             playSfx(sfx.pair);
+        }, sfxDelay);
+
         pairsFound++;
         
         firstCard.classList.add('is-matched');
@@ -440,7 +441,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleMismatch = () => {
-        playSfx(sfx.fail);
+        // ★★★ 修正点: 難易度に応じて音の遅延を変更 ★★★
+        const sfxDelay = difficulty === 'hard' ? 800 : 500;
+        setTimeout(() => {
+            playSfx(sfx.fail);
+        }, sfxDelay);
+
         setTimeout(() => {
             if (difficulty === 'hard') {
                 firstCard.classList.remove('is-flipped');
@@ -477,11 +483,13 @@ document.addEventListener('DOMContentLoaded', () => {
         playSfx(sfx.clear);
         setTimeout(() => {
             const modalContent = clearModal.querySelector('div');
-            clearModal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-75', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 50);
+            if (clearModal) clearModal.classList.remove('hidden');
+            if(modalContent){
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-75', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            }
         }, 500);
     };
 
@@ -494,16 +502,20 @@ document.addEventListener('DOMContentLoaded', () => {
     backToTitleFromClearBtn.addEventListener('click', () => {
         playSfx(sfx.button);
         const modalContent = clearModal.querySelector('div');
-        modalContent.classList.add('scale-75', 'opacity-0');
+        if (modalContent) {
+            modalContent.classList.add('scale-75', 'opacity-0');
+        }
         setTimeout(() => {
-            clearModal.classList.add('hidden');
+            if (clearModal) clearModal.classList.add('hidden');
             init();
         }, 300);
     });
 
     volumeSettingsBtn.addEventListener('click', () => {
         playSfx(sfx.button);
-        volumeControls.classList.toggle('hidden');
+        if (volumeControls) {
+            volumeControls.classList.toggle('hidden');
+        }
     });
 
     bgmVolumeSlider.addEventListener('input', () => {
@@ -519,10 +531,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 音量調整の外側をクリックしたら閉じる
     document.addEventListener('click', (event) => {
-        if (!volumeControls.classList.contains('hidden') && 
-            !volumeControls.contains(event.target) && 
-            !volumeSettingsBtn.contains(event.target)) {
-            volumeControls.classList.add('hidden');
+        if (volumeControls && volumeSettingsBtn) {
+             if (!volumeControls.classList.contains('hidden') && 
+                !volumeControls.contains(event.target) && 
+                !volumeSettingsBtn.contains(event.target)) {
+                volumeControls.classList.add('hidden');
+            }
         }
     });
 
