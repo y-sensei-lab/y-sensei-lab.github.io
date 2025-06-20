@@ -4,469 +4,549 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>デジタル神経衰弱</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Google Fontsからフォントを読み込み */
-        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap');
-
-        :root {
-            --bg-color: #f0f4f8;
-            --primary-color: #ffffff;
-            --accent-color: #4a90e2;
-            --accent-color-success: #50e3c2;
-            --font-color: #333333;
-            --card-size: 100px;
-            --gap-size: 12px;
-        }
-
-        @media (max-width: 600px) {
-            :root { --card-size: 80px; --gap-size: 8px; }
-        }
-
+        /* Google Fontsからポップなフォントを読み込む */
+        @import url('https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;700&display=swap');
+        
         body {
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--font-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none; /* Standard */
         }
 
-        .container {
-            width: 100%;
-            max-width: 960px;
-            margin: auto;
+        h1, .font-pop {
+            font-family: 'Mochiy Pop One', sans-serif;
         }
 
-        /* --- 各画面の制御 --- */
-        .screen { display: none; }
-        .screen.active { display: block; }
-        
-        .setup-screen h1 {
-            color: var(--accent-color);
-            font-size: clamp(2rem, 6vw, 2.8rem);
-            margin-bottom: 10px;
-        }
-        .setup-screen p {
-            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
-            color: var(--accent-color);
-            border: 2px solid var(--accent-color);
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        .btn:hover, .btn:focus {
-            background-color: var(--accent-color);
-            color: white;
-            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
-            transform: translateY(-2px);
-            outline: none;
-        }
-        .btn:disabled {
-            background-color: #ccc;
-            border-color: #999;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        #back-to-title-btn {
-            position: fixed; top: 20px; left: 20px; z-index: 1100;
-        }
-        input[type="file"] { display: none; }
-
-        /* --- ゲーム画面 --- */
-        .game-header {
-            display: flex; justify-content: center; align-items: center;
-            margin-bottom: 20px; height: 50px;
-        }
-        #message-area { font-size: 1.2rem; color: var(--accent-color); font-weight: bold; }
-        
-        .zoom-controls {
-            display: flex; gap: 10px;
-            position: fixed; bottom: 20px; right: 20px; z-index: 1100;
-        }
-        .zoom-btn {
-            background-color: var(--primary-color); border: 2px solid var(--accent-color);
-            width: 50px; height: 50px; border-radius: 50%; display: flex;
-            justify-content: center; align-items: center; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: all 0.2s ease;
-        }
-        .zoom-btn:hover { background-color: var(--accent-color); transform: translateY(-2px); }
-        .zoom-btn svg { width: 24px; height: 24px; stroke: var(--accent-color); transition: stroke 0.2s ease; }
-        .zoom-btn:hover svg { stroke: white; }
-
-        .game-board {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            gap: var(--gap-size); perspective: 1000px; padding: 10px;
-        }
-
+        /* カードのフリップ（裏返し）アニメーション */
         .card {
-            width: var(--card-size); height: var(--card-size); position: relative;
-            cursor: pointer; transform-style: preserve-3d;
-            transition: transform 0.6s, box-shadow 0.3s, width 0.3s, height 0.3s, opacity 0.5s, border-color 0.3s;
-            border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            border: 4px solid transparent; 
-            box-sizing: border-box;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
         }
-        .card.selected {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
         }
-        .card.flipped { transform: rotateY(180deg); }
-        .card.matched { transform: scale(0); opacity: 0; }
-        
+
         .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 8px;
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Safari */
         }
-        .card-front-img { width: 100%; height: 100%; object-fit: cover; }
-        .card-back {
-            background: linear-gradient(45deg, var(--accent-color), #63a4ff);
-            border: none; box-sizing: border-box; font-size: calc(var(--card-size) * 0.5);
-            color: white; text-shadow: 0 0 5px rgba(0,0,0,0.3); transition: font-size 0.3s;
-        }
-        .card-back::before { content: '？'; }
 
-        /* --- モーダル共通スタイル --- */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); display: flex;
-            justify-content: center; align-items: center; z-index: 1000;
-            opacity: 1; transition: opacity 0.4s ease;
+        .card-face.card-back {
+            transform: rotateY(180deg);
         }
-        .modal.hidden { display: none; opacity: 0; }
-        .modal-content {
-            background-color: var(--primary-color); padding: 30px; border-radius: 15px;
-            text-align: center; transform: scale(1); transition: transform 0.4s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 90%; width: 320px;
-        }
-        .modal.hidden .modal-content { transform: scale(0.7); }
-        .modal-content h2 { font-size: 1.8rem; margin-bottom: 20px; }
 
-        #settings-btn {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1200;
-            width: 50px; height: 50px; padding: 0; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
+        /* 隠しinput要素をスタイリングしてクリックしやすくする */
+        input[type="file"] {
+            display: none;
         }
-        #settings-btn svg { width: 28px; height: 28px; fill: var(--accent-color); transition: all 0.2s ease; }
-        #settings-btn:hover svg { fill: white; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .setting-item label { font-size: 1rem; }
-        .setting-item input[type="range"] { width: 120px; }
-
-        /* ローディングインジケーター */
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--accent-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
+<body class="bg-yellow-50 text-gray-800 overflow-hidden h-screen flex flex-col items-center justify-center">
 
-    <div class="container">
-        <div id="title-screen" class="screen active setup-screen">
-            <h1>デジタル神経衰弱</h1>
-            <p>「フォルダを選択（まとめて）」または「画像を選択」ボタンを押して、ゲームに使う画像を選んでください。</p>
-            <div class="controls">
-                <button id="folder-select-btn" class="btn" disabled>フォルダを選択</button>
+    <!-- ========== タイトル画面 ========== -->
+    <div id="title-screen" class="w-full max-w-2xl mx-auto p-8 text-center">
+        <h1 class="text-4xl md:text-6xl text-orange-500 mb-8 drop-shadow-md">デジタル神経衰弱</h1>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg border-2 border-orange-200">
+            <h2 class="text-xl font-bold mb-4 text-orange-600">1. 画像を選ぶ</h2>
+            <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>同じ画像が2枚で1ペアになります。</p>
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
+                <label for="folder-input" class="w-full bg-teal-400 hover:bg-teal-500 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                    <span>フォルダを選択 (まとめて)</span>
+                </label>
                 <input type="file" id="folder-input" webkitdirectory directory multiple>
-                <button id="file-select-btn" class="btn" disabled>画像を選択</button>
-                <input type="file" id="file-input" multiple accept="image/*">
+
+                <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
+                <label for="files-input" class="w-full bg-sky-400 hover:bg-sky-500 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                    <span>画像を1枚ずつ選択</span>
+                </label>
+                <input type="file" id="files-input" multiple accept="image/*">
             </div>
-            <button id="settings-btn" class="btn">
-                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+
+             <div id="image-preview-area" class="flex flex-wrap justify-center gap-2 mt-6 hidden"></div>
+             <p id="image-info" class="text-gray-600 hidden mt-4"></p>
+        </div>
+        
+        <div id="difficulty-selection" class="mt-8 bg-white p-6 rounded-2xl shadow-lg border-2 border-orange-200">
+            <h2 class="text-xl font-bold mb-4 text-orange-600">2. 難易度を選ぶ</h2>
+            <p class="text-sm text-gray-500 mb-4">
+                かんたん: 最初から全部見える<br>
+                むずかしい: 全部うら面から
+            </p>
+            <div class="flex justify-center gap-4">
+                 <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
+                <button id="easy-mode-btn" data-difficulty="easy" class="difficulty-btn w-1/2 bg-lime-500 hover:bg-lime-600 text-white font-bold p-2 rounded-xl shadow-md transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                    かんたん
+                </button>
+                 <!-- ★★★ 修正点: h-24をh-20に変更 ★★★ -->
+                <button id="hard-mode-btn" data-difficulty="hard" class="difficulty-btn w-1/2 bg-red-500 hover:bg-red-600 text-white font-bold p-2 rounded-xl shadow-md transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                    むずかしい
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ゲーム画面 ========== -->
+    <div id="game-screen" class="hidden w-full h-full flex flex-col p-4">
+        <div class="flex justify-between items-start mb-2">
+            <!-- タイトルへ戻るボタン -->
+            <button id="back-to-title-btn" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
+                タイトルに戻る
+            </button>
+            <!-- カードサイズ調整ボタン -->
+            <div class="flex gap-2">
+                <button id="zoom-out-btn" class="w-12 h-12 flex items-center justify-center bg-white hover:bg-gray-100 text-gray-600 font-bold rounded-full shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
+                </button>
+                <button id="zoom-in-btn" class="w-12 h-12 flex items-center justify-center bg-white hover:bg-gray-100 text-gray-600 font-bold rounded-full shadow-md transition-transform transform hover:scale-105">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ゲームボード -->
+        <div id="game-board-container" class="flex-grow flex items-center justify-center overflow-auto">
+             <div id="game-board" class="grid gap-2 md:gap-4 p-4">
+                <!-- カードはここに動的に生成されます -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== 音量調整 ========== -->
+    <div class="absolute bottom-4 left-4">
+        <button id="volume-settings-btn" class="w-14 h-14 flex items-center justify-center bg-pink-400 hover:bg-pink-500 text-white font-bold rounded-full shadow-lg transition-transform transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+        </button>
+        <div id="volume-controls" class="hidden absolute bottom-20 left-0 bg-white p-4 rounded-2xl shadow-2xl border-2 border-pink-200 w-64">
+            <div class="mb-4">
+                <label for="bgm-volume" class="block text-sm font-bold text-gray-700">BGM</label>
+                <input type="range" id="bgm-volume" min="0" max="1" step="0.01" class="w-full h-2 bg-pink-100 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div>
+                <label for="sfx-volume" class="block text-sm font-bold text-gray-700">効果音</label>
+                <input type="range" id="sfx-volume" min="0" max="1" step="0.01" class="w-full h-2 bg-pink-100 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+    </div>
+    
+    <!-- ========== ゲームクリアモーダル ========== -->
+    <div id="clear-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-10 rounded-3xl shadow-xl text-center transform scale-75 opacity-0 transition-all duration-300">
+            <h2 class="font-pop text-5xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-6">CLEAR!</h2>
+            <button id="back-to-title-from-clear-btn" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-8 rounded-full shadow-md transition-transform transform hover:scale-105">
+                タイトルに戻る
             </button>
         </div>
-        <div id="difficulty-screen" class="screen setup-screen">
-             <h1>難易度を選択</h1>
-             <p>カードの絵が見える「かんたん」モードと、見えない「むずかしい」モードを選んでください。</p>
-             <div class="controls">
-                 <button id="easy-btn" class="btn">かんたん</button>
-                 <button id="hard-btn" class="btn">むずかしい</button>
-             </div>
-        </div>
-        <div id="game-screen" class="screen">
-            <button id="back-to-title-btn" class="btn">タイトルに戻る</button>
-            <div class="game-header"><div id="message-area"></div></div>
-            <div id="game-board" class="game-board"></div>
-            <div class="zoom-controls">
-                <button id="zoom-out-btn" class="zoom-btn" aria-label="縮小"></button>
-                <button id="zoom-in-btn" class="zoom-btn" aria-label="拡大"></button>
-            </div>
-        </div>
-    </div>
-    <div id="win-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>クリア！</h2>
-            <p>おめでとうございます！</p>
-            <div class="controls"><button id="restart-btn" class="btn">新しい画像で遊ぶ</button></div>
-        </div>
-    </div>
-    <div id="settings-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>設定</h2>
-            <div class="setting-item">
-                <label for="bgm-volume">BGM 音量</label>
-                <input type="range" id="bgm-volume" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="setting-item">
-                <label for="sfx-volume">効果音 音量</label>
-                <input type="range" id="sfx-volume" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="controls"><button id="settings-close-btn" class="btn">閉じる</button></div>
-        </div>
-    </div>
-    <div id="loading-overlay" class="modal">
-        <div class="modal-content" style="background:none; box-shadow:none;">
-            <div class="loader"></div>
-            <p style="color:white; font-size:1.2rem;">音を準備しています...</p>
-        </div>
     </div>
 
-    <script>
-        const screens = { title: document.getElementById('title-screen'), difficulty: document.getElementById('difficulty-screen'), game: document.getElementById('game-screen') };
-        const gameBoard = document.getElementById('game-board'), messageArea = document.getElementById('message-area');
-        const folderSelectBtn = document.getElementById('folder-select-btn'), folderInput = document.getElementById('folder-input');
-        const fileSelectBtn = document.getElementById('file-select-btn'), fileInput = document.getElementById('file-input');
-        const easyBtn = document.getElementById('easy-btn'), hardBtn = document.getElementById('hard-btn');
-        const backToTitleBtn = document.getElementById('back-to-title-btn'), winModal = document.getElementById('win-modal');
-        const restartBtn = document.getElementById('restart-btn'), zoomInBtn = document.getElementById('zoom-in-btn'), zoomOutBtn = document.getElementById('zoom-out-btn');
-        const settingsBtn = document.getElementById('settings-btn'), settingsModal = document.getElementById('settings-modal'), settingsCloseBtn = document.getElementById('settings-close-btn');
-        const bgmVolumeSlider = document.getElementById('bgm-volume'), sfxVolumeSlider = document.getElementById('sfx-volume');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        
-        zoomOutBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>`;
-        zoomInBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>`;
 
-        let hasFlippedCard = false, lockBoard = false, firstCard, secondCard, matchedPairs = 0, totalPairs = 0;
-        let selectedImageUrls = [], gameMode = '';
-        
-        // --- サウンド関連 ---
-        let soundsReady = false;
-        const sfxVolume = new Tone.Volume().toDestination();
-        const bgmVolume = new Tone.Volume().toDestination();
-        const audioPath = 'https://y-sensei-lab.github.io/memory-game/audio/';
-        
-        const audioUrls = {
-            bgm: audioPath + 'bgm_main.mp3',
-            button: audioPath + 'sfx_button.mp3',
-            clear: audioPath + 'sfx_clear.mp3',
-            fail: audioPath + 'sfx_fail.mp3',
-            pair: audioPath + 'sfx_pair.mp3',
-            open: audioPath + 'sfx_open.mp3',
-        };
-        const players = new Tone.Players(audioUrls);
-        
-        players.player('bgm').connect(bgmVolume).loop = true;
-        Object.keys(audioUrls).forEach(name => {
-            if (name !== 'bgm') players.player(name).connect(sfxVolume);
-        });
+    <!-- ========== オーディオ要素 ========== -->
+    <audio id="bgm-main" src="https://y-sensei-lab.github.io/memory-game/audio/bgm_main.mp3" loop></audio>
+    <audio id="sfx-button" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_button.mp3"></audio>
+    <audio id="sfx-open" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_open.mp3"></audio>
+    <audio id="sfx-pair" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_pair.mp3"></audio>
+    <audio id="sfx-fail" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_fail.mp3"></audio>
+    <audio id="sfx-clear" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_clear.mp3"></audio>
 
-        Tone.loaded().then(() => {
-            loadingOverlay.classList.add('hidden');
-            folderSelectBtn.disabled = false;
-            fileSelectBtn.disabled = false;
-        });
 
-        const initAudioOnce = async () => {
-            if (soundsReady) return;
-            try {
-                await Tone.start();
-                soundsReady = true;
-                if (bgmVolumeSlider.value > 0) players.player('bgm').start();
-            } catch (e) { console.error(e); }
-        };
-        document.body.addEventListener('click', initAudioOnce, { once: true });
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ========== DOM要素の取得 ==========
+    const titleScreen = document.getElementById('title-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const clearModal = document.getElementById('clear-modal');
+    
+    const folderInput = document.getElementById('folder-input');
+    const filesInput = document.getElementById('files-input');
+    const imagePreviewArea = document.getElementById('image-preview-area');
+    const imageInfo = document.getElementById('image-info');
+    
+    const difficultySelection = document.getElementById('difficulty-selection');
+    const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+    
+    const gameBoard = document.getElementById('game-board');
+    const backToTitleBtn = document.getElementById('back-to-title-btn');
+    const backToTitleFromClearBtn = document.getElementById('back-to-title-from-clear-btn');
+    
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+
+    // 音量関連
+    const volumeSettingsBtn = document.getElementById('volume-settings-btn');
+    const volumeControls = document.getElementById('volume-controls');
+    const bgmVolumeSlider = document.getElementById('bgm-volume');
+    const sfxVolumeSlider = document.getElementById('sfx-volume');
+    
+    // オーディオ要素
+    const bgm = document.getElementById('bgm-main');
+    const sfx = {
+        button: document.getElementById('sfx-button'),
+        open: document.getElementById('sfx-open'),
+        pair: document.getElementById('sfx-pair'),
+        fail: document.getElementById('sfx-fail'),
+        clear: document.getElementById('sfx-clear'),
+    };
+
+    // ========== ゲームの状態管理 ==========
+    let selectedImages = [];
+    let difficulty = '';
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let pairsFound = 0;
+    let totalPairs = 0;
+    let currentCardSize = 128; // initial card size in px (w-32)
+
+    // ========== 音量管理 ==========
+    const loadVolumeSettings = () => {
+        const bgmVolume = localStorage.getItem('bgmVolume') || 0.5;
+        const sfxVolume = localStorage.getItem('sfxVolume') || 0.5;
+        bgmVolumeSlider.value = bgmVolume;
+        sfxVolumeSlider.value = sfxVolume;
+        applyVolumeSettings();
+    };
+
+    const applyVolumeSettings = () => {
+        bgm.volume = bgmVolumeSlider.value * 0.25;
+        Object.values(sfx).forEach(sound => sound.volume = sfxVolumeSlider.value);
+    };
+
+    const saveVolumeSettings = () => {
+        localStorage.setItem('bgmVolume', bgmVolumeSlider.value);
+        localStorage.setItem('sfxVolume', sfxVolumeSlider.value);
+    };
+
+    const playSfx = (sound) => {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+    };
+
+    // ========== 画面遷移 ==========
+    const showScreen = (screen) => {
+        titleScreen.classList.add('hidden');
+        gameScreen.classList.add('hidden');
+        if (screen === 'title') {
+            titleScreen.classList.remove('hidden');
+        } else if (screen === 'game') {
+            gameScreen.classList.remove('hidden');
+        }
+    };
+    
+    // ========== 初期化処理 ==========
+    const init = () => {
+        showScreen('title');
+        resetGameStates();
+        loadVolumeSettings();
+        // ユーザーのインタラクションを待ってBGMを再生
+        document.body.addEventListener('click', () => {
+             if (bgm.paused) {
+                bgm.play().catch(e => console.log("BGM play failed:", e));
+             }
+        }, { once: true });
+    };
+
+    // ========== 画像選択処理 ==========
+    const handleFileSelection = (files) => {
+        selectedImages = [];
+        const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
         
-        const playSfx = (name) => { if (soundsReady) players.player(name).start(); };
+        imageInfo.classList.remove('hidden');
 
-        // --- 設定の保存と読み込み ---
-        function saveSettings() {
-            const settings = {
-                bgm: bgmVolumeSlider.value,
-                sfx: sfxVolumeSlider.value,
-            };
-            localStorage.setItem('memoryGameSettings', JSON.stringify(settings));
+        if (imageFiles.length === 0) {
+            imageInfo.textContent = '画像ファイルが見つかりませんでした。';
+            return;
         }
 
-        function loadAndApplySettings() {
-            const savedSettings = localStorage.getItem('memoryGameSettings');
-            if (savedSettings) {
-                const settings = JSON.parse(savedSettings);
-                bgmVolumeSlider.value = settings.bgm;
-                sfxVolumeSlider.value = settings.sfx;
-            }
-            setBgmVolume(bgmVolumeSlider, bgmVolume);
-            setSfxVolume(sfxVolumeSlider, sfxVolume);
-        }
-
-        // --- イベントリスナー ---
-        const addSoundToBtn = (btn, action) => btn.addEventListener('click', () => { playSfx('button'); action(); });
-        addSoundToBtn(folderSelectBtn, () => folderInput.click());
-        addSoundToBtn(fileSelectBtn, () => fileInput.click());
-        addSoundToBtn(easyBtn, () => startGame('easy'));
-        addSoundToBtn(hardBtn, () => startGame('hard'));
-        addSoundToBtn(restartBtn, () => setTimeout(() => location.reload(), 300));
-        addSoundToBtn(backToTitleBtn, () => { players.player('bgm').stop(); setTimeout(() => location.reload(), 300); });
-        addSoundToBtn(zoomInBtn, () => changeCardSize(10));
-        addSoundToBtn(zoomOutBtn, () => changeCardSize(-10));
-        addSoundToBtn(settingsBtn, () => settingsModal.classList.remove('hidden'));
-        addSoundToBtn(settingsCloseBtn, () => settingsModal.classList.add('hidden'));
-
-        folderInput.addEventListener('change', handleFileSelect);
-        fileInput.addEventListener('change', handleFileSelect);
+        imageInfo.textContent = `${imageFiles.length}枚の画像を読み込み中...`;
         
-        const setBgmVolume = (slider, volumeNode) => {
-            const val = parseFloat(slider.value);
-            const scaledVal = val * 0.25;
-            volumeNode.mute = val === 0;
-            if (val > 0) volumeNode.volume.value = Tone.gainToDb(scaledVal);
-        };
-
-        const setSfxVolume = (slider, volumeNode) => {
-            const val = parseFloat(slider.value);
-            volumeNode.mute = val === 0;
-            if (val > 0) volumeNode.volume.value = Tone.gainToDb(val) + 6;
-        };
-
-        bgmVolumeSlider.addEventListener('input', () => {
-            setBgmVolume(bgmVolumeSlider, bgmVolume);
-            if (soundsReady && bgmVolumeSlider.value > 0 && players.player('bgm').state !== 'started') {
-                players.player('bgm').start();
-            } else if (soundsReady && bgmVolumeSlider.value == 0) {
-                 players.player('bgm').stop();
-            }
-            saveSettings();
-        });
-        sfxVolumeSlider.addEventListener('input', () => {
-            setSfxVolume(sfxVolumeSlider, sfxVolume);
-            saveSettings();
-        });
-        
-        function switchScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
-
-        function handleFileSelect(e) {
-            const files = e.target.files; if (!files || files.length === 0) return;
-            const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-            if (imageFiles.length === 0) { alert("画像ファイルが見つかりませんでした。"); return; }
-            selectedImageUrls.forEach(url => URL.revokeObjectURL(url));
-            selectedImageUrls = imageFiles.map(file => URL.createObjectURL(file));
-            switchScreen('difficulty');
-        }
-
-        function startGame(difficulty) { gameMode = difficulty; switchScreen('game'); setupGame(); }
-
-        function setupGame() {
-            resetGame();
-            const cardUrls = [...selectedImageUrls, ...selectedImageUrls];
-            totalPairs = selectedImageUrls.length;
-            shuffle(cardUrls);
-            cardUrls.forEach(url => {
-                const cardElement = createCardElement(url);
-                cardElement.addEventListener('click', handleCardClick);
-                if (gameMode === 'easy') cardElement.classList.add('flipped');
-                gameBoard.appendChild(cardElement);
+        const readerPromises = imageFiles.map(file => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = e => reject(e);
+                reader.readAsDataURL(file);
             });
-            showMessage(`${totalPairs}ペアのカードでゲーム開始！`);
-        }
-        
-        function createCardElement(url) {
-            const cardElement = document.createElement('div');
-            cardElement.classList.add('card'); cardElement.dataset.id = url;
-            cardElement.innerHTML = `<div class="card-face card-back"></div><div class="card-face card-front"><img src="${url}" alt="カード画像" class="card-front-img" loading="lazy"></div>`;
-            return cardElement;
-        }
+        });
 
-        function handleCardClick() {
-            if (lockBoard || this.classList.contains('matched')) return;
+        Promise.all(readerPromises).then(results => {
+            selectedImages = results;
+            updateImagePreview();
+            imageInfo.textContent = `${selectedImages.length}枚の画像を選択しました。`;
+        }).catch(error => {
+            console.error("画像読み込みエラー:", error);
+            imageInfo.textContent = '画像の読み込みに失敗しました。';
+        });
+    };
+    
+    const updateImagePreview = () => {
+        imagePreviewArea.innerHTML = '';
+        if (selectedImages.length > 0) {
+            imagePreviewArea.classList.remove('hidden');
+            selectedImages.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = 'w-16 h-16 object-cover rounded-lg shadow-md';
+                imagePreviewArea.appendChild(img);
+            });
+        } else {
+            imagePreviewArea.classList.add('hidden');
+        }
+    };
 
-            if (this === firstCard) {
-                playSfx('button');
-                if (gameMode === 'hard') this.classList.remove('flipped');
-                else this.classList.remove('selected');
-                hasFlippedCard = false; firstCard = null;
+    folderInput.addEventListener('change', (e) => {
+        playSfx(sfx.button);
+        filesInput.value = ''; // 同時選択を防ぐ
+        handleFileSelection(e.target.files);
+    });
+
+    filesInput.addEventListener('change', (e) => {
+        playSfx(sfx.button);
+        folderInput.value = ''; // 同時選択を防ぐ
+        handleFileSelection(e.target.files);
+    });
+    
+    // ========== ゲーム開始処理 ==========
+    difficultyBtns.forEach(button => {
+        button.addEventListener('click', (e) => {
+            if (selectedImages.length === 0) {
+                imageInfo.classList.remove('hidden');
+                imageInfo.textContent = '先に画像を選択してください！';
                 return;
             }
+            playSfx(sfx.button);
+            difficulty = e.currentTarget.dataset.difficulty;
+            startGame();
+        });
+    });
 
-            if (gameMode === 'hard') {
-                if (this.classList.contains('flipped')) return;
-                this.classList.add('flipped'); playSfx('open');
-            } else {
-                if (this.classList.contains('selected')) return;
-                this.classList.add('selected'); playSfx('button');
+    const startGame = () => {
+        // ゲーム開始時に必要なボードとスコアのリセットのみを実行
+        gameBoard.innerHTML = '';
+        resetTurn();
+        pairsFound = 0;
+        
+        totalPairs = selectedImages.length;
+        let gameImages = [...selectedImages, ...selectedImages]; // ペアを作成
+
+        // Fisher-Yatesシャッフル
+        for (let i = gameImages.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [gameImages[i], gameImages[j]] = [gameImages[j], gameImages[i]];
+        }
+        
+        setupGameBoard(gameImages);
+        showScreen('game');
+    };
+    
+    const setupGameBoard = (images) => {
+        // グリッドの列数を計算
+        const numCards = images.length;
+        const columns = Math.ceil(Math.sqrt(numCards));
+        gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        
+        gameBoard.innerHTML = '';
+        images.forEach((imageSrc, index) => {
+            const card = document.createElement('div');
+            card.style.width = `${currentCardSize}px`;
+            card.style.height = `${currentCardSize}px`;
+            card.dataset.id = imageSrc;
+            card.classList.add('card', 'relative', 'cursor-pointer', 'rounded-xl', 'shadow-lg');
+            
+            card.innerHTML = `
+                <div class="card-face card-front absolute w-full h-full rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center p-2">
+                    <span class="font-pop text-4xl text-white drop-shadow-md">?</span>
+                </div>
+                <div class="card-face card-back absolute w-full h-full rounded-xl bg-white p-1">
+                    <img src="${imageSrc}" class="w-full h-full object-cover rounded-lg" draggable="false">
+                </div>
+            `;
+            
+            if (difficulty === 'easy') {
+                card.classList.add('is-flipped');
             }
-            if (!hasFlippedCard) { hasFlippedCard = true; firstCard = this; return; }
-            secondCard = this; lockBoard = true; checkForMatch();
-        }
-        
-        function checkForMatch() { (firstCard.dataset.id === secondCard.dataset.id) ? disableCards() : resetPair(); }
 
-        function disableCards() {
-            showMessage("せいかい！"); playSfx('pair');
-            firstCard.removeEventListener('click', handleCardClick); secondCard.removeEventListener('click', handleCardClick);
+            card.addEventListener('click', () => onCardClick(card));
+            gameBoard.appendChild(card);
+        });
+    };
+
+    // ========== ゲーム中のカードクリック処理 ==========
+    const onCardClick = (card) => {
+        if (lockBoard || card === firstCard || card.classList.contains('is-matched')) return;
+
+        if (difficulty === 'hard') {
+            // 既にめくられているカードを再度クリックして選択をキャンセルする場合
+            if (card.classList.contains('is-flipped')) {
+                card.classList.remove('is-flipped'); // 先にアニメーションを開始
+                setTimeout(() => playSfx(sfx.open), 200); // 少し遅れて音を鳴らす
+                firstCard = null;
+                return;
+            }
+            // カードをめくる場合
+            card.classList.add('is-flipped'); // 先にアニメーションを開始
+            setTimeout(() => playSfx(sfx.open), 200); // 少し遅れて音を鳴らす
+
+        } else { // easy mode
+            playSfx(sfx.button);
+            if (card.classList.contains('is-selected')) {
+                 // 選択解除
+                 card.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-blue-500');
+                 firstCard = null;
+                 return;
+            }
+            card.classList.add('is-selected', 'ring-4', 'ring-offset-2', 'ring-blue-500');
+        }
+
+        if (!firstCard) {
+            firstCard = card;
+            return;
+        }
+
+        secondCard = card;
+        lockBoard = true;
+        checkForMatch();
+    };
+
+    const checkForMatch = () => {
+        const isMatch = firstCard.dataset.id === secondCard.dataset.id;
+        isMatch ? handleMatch() : handleMismatch();
+    };
+
+    const handleMatch = () => {
+        playSfx(sfx.pair);
+        pairsFound++;
+        
+        firstCard.classList.add('is-matched');
+        secondCard.classList.add('is-matched');
+        
+        setTimeout(() => {
+            if (difficulty === 'easy') {
+                firstCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-blue-500');
+                secondCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-blue-500');
+            }
+            firstCard.style.visibility = 'hidden';
+            secondCard.style.visibility = 'hidden';
+            resetTurn();
+            if (pairsFound === totalPairs) {
+                endGame();
+            }
+        }, 1000);
+    };
+
+    const handleMismatch = () => {
+        playSfx(sfx.fail);
+        setTimeout(() => {
+            if (difficulty === 'hard') {
+                firstCard.classList.remove('is-flipped');
+                secondCard.classList.remove('is-flipped');
+            } else { // easy mode
+                firstCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-blue-500');
+                secondCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-blue-500');
+            }
+            resetTurn();
+        }, 1200);
+    };
+
+    const resetTurn = () => {
+        [firstCard, secondCard] = [null, null];
+        lockBoard = false;
+    };
+    
+    const resetGameStates = () => {
+        gameBoard.innerHTML = '';
+        selectedImages = [];
+        difficulty = '';
+        resetTurn();
+        pairsFound = 0;
+        totalPairs = 0;
+        imagePreviewArea.innerHTML = '';
+        imagePreviewArea.classList.add('hidden');
+        imageInfo.textContent = '';
+        imageInfo.classList.add('hidden');
+        folderInput.value = '';
+        filesInput.value = '';
+    };
+
+    const endGame = () => {
+        playSfx(sfx.clear);
+        setTimeout(() => {
+            const modalContent = clearModal.querySelector('div');
+            clearModal.classList.remove('hidden');
             setTimeout(() => {
-                firstCard.classList.add('matched'); secondCard.classList.add('matched');
-                matchedPairs++; if (matchedPairs === totalPairs) winGame();
-                resetBoard();
-            }, 800);
-        }
+                modalContent.classList.remove('scale-75', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }, 500);
+    };
 
-        function resetPair() {
-            showMessage("ざんねん！"); playSfx('fail');
-            setTimeout(() => {
-                if (gameMode === 'hard') { firstCard.classList.remove('flipped'); secondCard.classList.remove('flipped'); } 
-                else { firstCard.classList.remove('selected'); secondCard.classList.remove('selected'); }
-                resetBoard();
-            }, 1200);
-        }
+    // ========== イベントリスナー設定 ==========
+    backToTitleBtn.addEventListener('click', () => {
+        playSfx(sfx.button);
+        init();
+    });
 
-        function winGame() {
-            showMessage("ゲームクリア！おめでとう！"); playSfx('clear'); players.player('bgm').stop();
-            setTimeout(() => winModal.classList.remove('hidden'), 1000);
-        }
+    backToTitleFromClearBtn.addEventListener('click', () => {
+        playSfx(sfx.button);
+        const modalContent = clearModal.querySelector('div');
+        modalContent.classList.add('scale-75', 'opacity-0');
+        setTimeout(() => {
+            clearModal.classList.add('hidden');
+            init();
+        }, 300);
+    });
 
-        function changeCardSize(amount) {
-            const root = document.documentElement;
-            const currentSize = parseInt(getComputedStyle(root).getPropertyValue('--card-size'), 10);
-            let newSize = Math.max(40, Math.min(200, currentSize + amount));
-            root.style.setProperty('--card-size', `${newSize}px`);
+    volumeSettingsBtn.addEventListener('click', () => {
+        playSfx(sfx.button);
+        volumeControls.classList.toggle('hidden');
+    });
+
+    bgmVolumeSlider.addEventListener('input', () => {
+        applyVolumeSettings();
+        saveVolumeSettings();
+    });
+
+    sfxVolumeSlider.addEventListener('input', () => {
+        applyVolumeSettings();
+        playSfx(sfx.button); // 設定変更がわかるように音を鳴らす
+        saveVolumeSettings();
+    });
+    
+    // 音量調整の外側をクリックしたら閉じる
+    document.addEventListener('click', (event) => {
+        if (!volumeControls.classList.contains('hidden') && 
+            !volumeControls.contains(event.target) && 
+            !volumeSettingsBtn.contains(event.target)) {
+            volumeControls.classList.add('hidden');
         }
-        
-        function resetBoard() { [hasFlippedCard, lockBoard] = [false, false]; [firstCard, secondCard] = [null, null]; }
-        function resetGame() { gameBoard.innerHTML = ''; matchedPairs = 0; totalPairs = 0; resetBoard(); }
-        function shuffle(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
-        function showMessage(text) { messageArea.textContent = text; }
-        
-        // ページ読み込み時に設定を読み込む
-        loadAndApplySettings();
-    </script>
+    });
+
+    const adjustCardSize = (delta) => {
+        playSfx(sfx.button);
+        const newSize = currentCardSize + delta;
+        if (newSize >= 48 && newSize <= 256) { // 最小・最大サイズ制限
+            currentCardSize = newSize;
+            const cards = gameBoard.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.width = `${currentCardSize}px`;
+                card.style.height = `${currentCardSize}px`;
+            });
+        }
+    };
+
+    zoomInBtn.addEventListener('click', () => adjustCardSize(16));
+    zoomOutBtn.addEventListener('click', () => adjustCardSize(-16));
+
+
+    // ========== アプリケーション開始 ==========
+    init();
+});
+</script>
+
 </body>
 </html>
