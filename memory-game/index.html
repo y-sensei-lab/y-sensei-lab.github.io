@@ -170,7 +170,7 @@
             width: 50px; height: 50px; padding: 0; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
         }
-        #settings-btn svg { width: 24px; height: 24px; fill: var(--accent-color); transition: all 0.2s ease; }
+        #settings-btn svg { width: 28px; height: 28px; fill: var(--accent-color); transition: all 0.2s ease; }
         #settings-btn:hover svg { fill: white; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .setting-item label { font-size: 1rem; }
@@ -202,7 +202,7 @@
                 <input type="file" id="file-input" multiple accept="image/*">
             </div>
             <button id="settings-btn" class="btn">
-                <svg viewBox="0 0 24 24"><path d="M19.4,12.5c0.2-0.5,0.2-1,0-1.5l-2.6-1.5c-0.4-0.7-0.9-1.3-1.5-1.9l1.5-2.6c0.4-0.6,0.2-1.4-0.4-1.8L14.7,2 c-0.6-0.4-1.4-0.2-1.8,0.4L11.4,5c-0.6,0-1.2,0.1-1.8,0.2L7.9,2.6C7.4,2,6.6,1.8,6,2.2L3.8,3.9C3.2,4.3,3,5.1,3.4,5.7l1.5,2.6 c-0.7,0.4-1.3,0.9-1.9,1.5L1.5,11c-0.6,0.4-0.8,1.2-0.4,1.8l1.7,2.2c0.4,0.6,1.2,0.8,1.8,0.4l2.6-1.5c0.4,0.7,0.9,1.3,1.5,1.9 l-1.5,2.6c-0.4,0.6-0.2,1.4,0.4,1.8l2.2,1.7c0.6,0.4,1.4,0.2,1.8-0.4l1.5-2.6c0.6,0-1.2-0.1,1.8-0.2l1.7,2.6 c0.5,0.6,1.3,0.8,1.8,0.4l2.2-1.7c0.6-0.4,0.8-1.2,0.4-1.8l-1.5-2.6c0.7-0.4,1.3-0.9,1.9-1.5L19.4,12.5z M12,15.5 c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
             </button>
         </div>
         <div id="difficulty-screen" class="screen setup-screen">
@@ -244,7 +244,6 @@
             <div class="controls"><button id="settings-close-btn" class="btn">閉じる</button></div>
         </div>
     </div>
-    <!-- 読み込みオーバーレイ -->
     <div id="loading-overlay" class="modal">
         <div class="modal-content" style="background:none; box-shadow:none;">
             <div class="loader"></div>
@@ -297,7 +296,7 @@
             fileSelectBtn.disabled = false;
         });
 
-        const initAudio = async () => {
+        const initAudioOnce = async () => {
             if (soundsReady) return;
             try {
                 await Tone.start();
@@ -305,10 +304,32 @@
                 if (bgmVolumeSlider.value > 0) players.player('bgm').start();
             } catch (e) { console.error(e); }
         };
+        document.body.addEventListener('click', initAudioOnce, { once: true });
+        
         const playSfx = (name) => { if (soundsReady) players.player(name).start(); };
 
+        // --- 設定の保存と読み込み ---
+        function saveSettings() {
+            const settings = {
+                bgm: bgmVolumeSlider.value,
+                sfx: sfxVolumeSlider.value,
+            };
+            localStorage.setItem('memoryGameSettings', JSON.stringify(settings));
+        }
+
+        function loadAndApplySettings() {
+            const savedSettings = localStorage.getItem('memoryGameSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                bgmVolumeSlider.value = settings.bgm;
+                sfxVolumeSlider.value = settings.sfx;
+            }
+            setBgmVolume(bgmVolumeSlider, bgmVolume);
+            setSfxVolume(sfxVolumeSlider, sfxVolume);
+        }
+
         // --- イベントリスナー ---
-        const addSoundToBtn = (btn, action) => btn.addEventListener('click', () => { initAudio(); playSfx('button'); action(); });
+        const addSoundToBtn = (btn, action) => btn.addEventListener('click', () => { playSfx('button'); action(); });
         addSoundToBtn(folderSelectBtn, () => folderInput.click());
         addSoundToBtn(fileSelectBtn, () => fileInput.click());
         addSoundToBtn(easyBtn, () => startGame('easy'));
@@ -323,23 +344,17 @@
         folderInput.addEventListener('change', handleFileSelect);
         fileInput.addEventListener('change', handleFileSelect);
         
-        // 【変更点】音量調整のロジックを更新
         const setBgmVolume = (slider, volumeNode) => {
-            const val = parseFloat(slider.value); // val is 0 to 1
+            const val = parseFloat(slider.value);
             const scaledVal = val * 0.25;
             volumeNode.mute = val === 0;
-            if (val > 0) {
-                volumeNode.volume.value = Tone.gainToDb(scaledVal);
-            }
+            if (val > 0) volumeNode.volume.value = Tone.gainToDb(scaledVal);
         };
 
         const setSfxVolume = (slider, volumeNode) => {
-            const val = parseFloat(slider.value); // val is 0 to 1
+            const val = parseFloat(slider.value);
             volumeNode.mute = val === 0;
-            if (val > 0) {
-                // +6dBで音量が約2倍に
-                volumeNode.volume.value = Tone.gainToDb(val) + 6;
-            }
+            if (val > 0) volumeNode.volume.value = Tone.gainToDb(val) + 6;
         };
 
         bgmVolumeSlider.addEventListener('input', () => {
@@ -349,12 +364,13 @@
             } else if (soundsReady && bgmVolumeSlider.value == 0) {
                  players.player('bgm').stop();
             }
+            saveSettings();
         });
-        sfxVolumeSlider.addEventListener('input', () => setSfxVolume(sfxVolumeSlider, sfxVolume));
-
-        setBgmVolume(bgmVolumeSlider, bgmVolume);
-        setSfxVolume(sfxVolumeSlider, sfxVolume);
-
+        sfxVolumeSlider.addEventListener('input', () => {
+            setSfxVolume(sfxVolumeSlider, sfxVolume);
+            saveSettings();
+        });
+        
         function switchScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
 
         function handleFileSelect(e) {
@@ -448,6 +464,9 @@
         function resetGame() { gameBoard.innerHTML = ''; matchedPairs = 0; totalPairs = 0; resetBoard(); }
         function shuffle(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
         function showMessage(text) { messageArea.textContent = text; }
+        
+        // ページ読み込み時に設定を読み込む
+        loadAndApplySettings();
     </script>
 </body>
 </html>
