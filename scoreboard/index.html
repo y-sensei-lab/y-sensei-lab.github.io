@@ -47,7 +47,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-2 sm:p-4">
+<!-- モバイル表示で下部に余白を追加 (pb-8) し、見切れを防止 -->
+<body class="bg-gray-100 h-screen flex flex-col items-center justify-center px-2 pt-2 pb-8 sm:p-4">
 
     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-4 flex-shrink-0" style="font-family: 'Mochiy Pop One', sans-serif;">スコアトラッカー</h1>
 
@@ -69,7 +70,7 @@
             <div class="mt-auto pt-2 md:pt-4 w-full flex-shrink-0">
                 <div class="flex gap-2">
                     <input type="text" id="member-name-0" class="w-full px-3 py-2 rounded-lg border-2 border-blue-200 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base" placeholder="メンバーの名前">
-                    <button onclick="addMember(0)" class="bg-white text-blue-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-blue-50 transition-transform transform hover:scale-105">追加</button>
+                    <button id="add-button-0" onclick="addMember(0)" class="bg-white text-blue-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-blue-50 transition-transform transform hover:scale-105">追加</button>
                 </div>
             </div>
         </div>
@@ -82,7 +83,7 @@
             <div class="mt-auto pt-2 md:pt-4 w-full flex-shrink-0">
                 <div class="flex gap-2">
                     <input type="text" id="member-name-1" class="w-full px-3 py-2 rounded-lg border-2 border-red-200 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base" placeholder="メンバーの名前">
-                    <button onclick="addMember(1)" class="bg-white text-red-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-red-50 transition-transform transform hover:scale-105">追加</button>
+                    <button id="add-button-1" onclick="addMember(1)" class="bg-white text-red-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-red-50 transition-transform transform hover:scale-105">追加</button>
                 </div>
             </div>
         </div>
@@ -117,10 +118,11 @@
             { name: 'あかチーム', members: [], totalScore: 0 }
         ];
 
-        // 初期表示を行う
+        // 初期表示とリサイズ時のイベント設定
         document.addEventListener('DOMContentLoaded', () => {
             renderAll();
             setupTeamNameListeners();
+            window.addEventListener('resize', renderAll);
         });
 
         // チーム名入力のイベントリスナーを設定
@@ -131,23 +133,16 @@
             ];
 
             teamNameInputs.forEach((input, index) => {
-                // データ属性に現在の名前を保存する
                 input.setAttribute('data-current-name', input.value);
-
                 input.addEventListener('focus', (e) => {
-                    // フォーカスが当たったら入力フィールドをクリアする
                     e.target.value = '';
                 });
-
                 input.addEventListener('blur', (e) => {
                     if (e.target.value.trim() === '') {
-                        // 入力が空のままフォーカスが外れたら、保存しておいた名前に戻す
                         e.target.value = e.target.getAttribute('data-current-name');
                     } else {
-                        // 新しい名前が入力されたら、データ属性を更新する
                         e.target.setAttribute('data-current-name', e.target.value);
                     }
-                    // チームデータオブジェクトを最終的な値で更新する
                     teams[index].name = e.target.value;
                 });
             });
@@ -160,16 +155,37 @@
             updateProgressBar();
         }
 
-        // メンバーリストの表示を更新する
+        // メンバーリストの表示と入力制御を更新する
         function renderMembers() {
             teams.forEach((team, teamIndex) => {
                 const membersContainer = document.getElementById(`team-${teamIndex}-members`);
-                membersContainer.innerHTML = ''; // 一旦空にする
+                const nameInput = document.getElementById(`member-name-${teamIndex}`);
+                const addButton = document.getElementById(`add-button-${teamIndex}`);
+
+                // 表示領域の高さと行の高さから、表示可能な行数を計算
+                const availableHeight = membersContainer.offsetHeight;
+                const rowHeight = window.innerWidth < 640 ? 36 : 40; // モバイルとPCで行の高さを調整
+                const maxInCol = Math.max(1, Math.floor(availableHeight / rowHeight));
+                const maxTotal = maxInCol * 2;
+
+                // メンバー追加ボタンと入力欄の有効/無効を切り替え
+                if (team.members.length >= maxTotal) {
+                    nameInput.disabled = true;
+                    addButton.disabled = true;
+                    nameInput.placeholder = 'これ以上追加できません';
+                    addButton.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    nameInput.disabled = false;
+                    addButton.disabled = false;
+                    nameInput.placeholder = 'メンバーの名前';
+                    addButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
                 
+                membersContainer.innerHTML = ''; // メンバーリストをクリア
                 const memberListWrapper = document.createElement('div');
 
-                // メンバーが一定数以上になったら2列にする
-                if (team.members.length > 5) {
+                // 1列で表示しきれない場合は2列表示に切り替え
+                if (team.members.length > maxInCol) {
                     memberListWrapper.className = 'grid grid-cols-1 sm:grid-cols-2 gap-1';
                 } else {
                     memberListWrapper.className = 'space-y-1';
@@ -180,8 +196,8 @@
                     memberDiv.className = 'flex items-center justify-between bg-white bg-opacity-30 rounded-lg p-1 md:p-2 shadow';
                     
                     const memberName = document.createElement('span');
-                    const nameFontSize = team.members.length > 5 ? 'text-sm sm:text-base' : 'text-base sm:text-lg';
-                    memberName.className = `text-white font-semibold flex-grow ${nameFontSize}`;
+                    const nameFontSize = team.members.length > maxInCol ? 'text-sm sm:text-base' : 'text-base sm:text-lg';
+                    memberName.className = `text-white font-semibold flex-grow ${nameFontSize} truncate`;
                     memberName.textContent = member.name;
                     
                     const scoreControls = document.createElement('div');
@@ -196,15 +212,11 @@
                     scoreInput.type = 'number';
                     scoreInput.className = 'score-input w-10 text-base sm:w-12 sm:text-lg font-bold bg-white rounded-md p-1 shadow-inner text-center';
                     scoreInput.value = member.score;
-                    scoreInput.min = "0"; // マイナス点を入力できないように
+                    scoreInput.min = "0";
                     scoreInput.addEventListener('input', (e) => {
                         const value = parseInt(e.target.value, 10);
-                        if (isNaN(value) || value < 0) {
-                            member.score = 0;
-                            e.target.value = 0;
-                        } else {
-                            member.score = value;
-                        }
+                        member.score = (isNaN(value) || value < 0) ? 0 : value;
+                        e.target.value = member.score;
                         renderAll();
                     });
 
@@ -216,15 +228,13 @@
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = '✕';
                     deleteButton.className = 'mr-2 text-white font-bold hover:text-red-200 text-lg sm:text-xl';
-                    deleteButton.onclick = () => {
-                        deleteMember(teamIndex, memberIndex);
-                    };
+                    deleteButton.onclick = () => deleteMember(teamIndex, memberIndex);
 
                     scoreControls.appendChild(minusButton);
                     scoreControls.appendChild(scoreInput);
                     scoreControls.appendChild(plusButton);
                     
-                    memberDiv.appendChild(deleteButton); // ✕ボタンを左に
+                    memberDiv.appendChild(deleteButton);
                     memberDiv.appendChild(memberName);
                     memberDiv.appendChild(scoreControls);
                     memberListWrapper.appendChild(memberDiv);
@@ -233,32 +243,27 @@
             });
         }
         
-        // メンバーを追加する
         function addMember(teamIndex) {
             const nameInput = document.getElementById(`member-name-${teamIndex}`);
             const name = nameInput.value.trim();
-            if (name) {
+            if (name && !nameInput.disabled) {
                 teams[teamIndex].members.push({ name: name, score: 0 });
                 nameInput.value = '';
                 renderAll();
             }
         }
 
-        // スコアを変更する
         function changeScore(teamIndex, memberIndex, amount) {
             const newScore = teams[teamIndex].members[memberIndex].score + amount;
-            // スコアがマイナスにならないようにする
             teams[teamIndex].members[memberIndex].score = Math.max(0, newScore);
             renderAll();
         }
 
-        // メンバーを削除する
         function deleteMember(teamIndex, memberIndex) {
             teams[teamIndex].members.splice(memberIndex, 1);
             renderAll();
         }
 
-        // 合計点を計算する
         function calculateTotalScores() {
             teams.forEach((team, teamIndex) => {
                 const total = team.members.reduce((sum, member) => sum + member.score, 0);
@@ -267,26 +272,23 @@
             });
         }
 
-        // 優勢バーを更新する
         function updateProgressBar() {
             const totalScore1 = teams[0].totalScore;
             const totalScore2 = teams[1].totalScore;
             const grandTotal = totalScore1 + totalScore2;
-
-            const progressBar1 = document.getElementById('progress-bar-0');
-            const progressBar2 = document.getElementById('progress-bar-1');
+            const bar1 = document.getElementById('progress-bar-0');
+            const bar2 = document.getElementById('progress-bar-1');
 
             if (grandTotal === 0) {
-                progressBar1.style.width = '50%';
-                progressBar2.style.width = '50%';
+                bar1.style.width = '50%';
+                bar2.style.width = '50%';
             } else {
                 const percentage1 = (totalScore1 / grandTotal) * 100;
-                progressBar1.style.width = `${percentage1}%`;
-                progressBar2.style.width = `${100 - percentage1}%`;
+                bar1.style.width = `${percentage1}%`;
+                bar2.style.width = `${100 - percentage1}%`;
             }
         }
         
-        // 点数をリセットする
         function resetScores() {
             teams.forEach(team => {
                 team.members.forEach(member => {
@@ -296,7 +298,6 @@
             renderAll();
         }
 
-        // ゲームを終了し、結果を発表する
         function endGame() {
             const score1 = teams[0].totalScore;
             const score2 = teams[1].totalScore;
@@ -307,33 +308,31 @@
             const message = document.getElementById('result-message');
             const scoreDisplay = document.getElementById('result-score');
             
-            // 以前のスタイルをクリア
             title.style.color = '';
-            scoreDisplay.style.color = '';
             scoreDisplay.innerHTML = '';
             
-            if (score1 === score2) { // 引き分けの場合
+            if (score1 === score2) {
                 title.textContent = "ひきわけ！";
                 message.textContent = "どっちのチームもがんばったね！";
                 scoreDisplay.textContent = `${score1} - ${score2}`;
-                resultBox.style.borderColor = '#fbbf24'; // yellow-400
-                title.style.color = '#ca8a04'; // yellow-600
-                scoreDisplay.style.color = '#ca8a04'; // yellow-600
-            } else { // 勝敗が決まった場合
+                resultBox.style.borderColor = '#fbbf24';
+                title.style.color = '#ca8a04';
+                scoreDisplay.style.color = '#ca8a04';
+            } else {
                 let winner, winnerColor, winnerBorderColor;
                 let score1Color, score2Color;
-                const blackColor = '#1f2937'; // gray-800
+                const blackColor = '#1f2937';
 
-                if (score1 > score2) { // チーム1（あお）の勝ち
+                if (score1 > score2) {
                     winner = teams[0];
-                    winnerColor = '#2563eb'; // blue-600
-                    winnerBorderColor = '#3b82f6'; // blue-500
+                    winnerColor = '#2563eb';
+                    winnerBorderColor = '#3b82f6';
                     score1Color = winnerColor;
                     score2Color = blackColor;
-                } else { // チーム2（あか）の勝ち
+                } else {
                     winner = teams[1];
-                    winnerColor = '#dc2626'; // red-600
-                    winnerBorderColor = '#ef4444'; // red-500
+                    winnerColor = '#dc2626';
+                    winnerBorderColor = '#ef4444';
                     score1Color = blackColor;
                     score2Color = winnerColor;
                 }
@@ -342,8 +341,6 @@
                 message.textContent = "おめでとう！やったね！";
                 title.style.color = winnerColor;
                 resultBox.style.borderColor = winnerBorderColor;
-                
-                // 常にチーム1、チーム2の順番でスコアを表示
                 scoreDisplay.innerHTML = `<span style="color: ${score1Color};">${score1}</span><span style="color: ${blackColor};"> - </span><span style="color: ${score2Color};">${score2}</span>`;
             }
 
@@ -356,7 +353,6 @@
             }, 10);
         }
 
-        // モーダルを閉じる
         function closeModal() {
             const modal = document.getElementById('result-modal');
             const resultBox = document.getElementById('result-box');
@@ -367,7 +363,6 @@
             }, 500);
         }
 
-        // 紙吹雪を飛ばす
         function launchConfetti() {
             const colors = ['#ef4444', '#3b82f6', '#fbbf24', '#34d399', '#a78bfa'];
             for (let i = 0; i < 100; i++) {
@@ -376,10 +371,8 @@
                 confetti.style.left = `${Math.random() * 100}vw`;
                 confetti.style.animationDelay = `${Math.random() * 2}s`;
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.transform = `scale(${Math.random() * 0.8 + 0.5})`; // 大きさもランダムに
+                confetti.style.transform = `scale(${Math.random() * 0.8 + 0.5})`;
                 document.body.appendChild(confetti);
-
-                // アニメーションが終わったら要素を削除
                 setTimeout(() => {
                     confetti.remove();
                 }, 3000);
