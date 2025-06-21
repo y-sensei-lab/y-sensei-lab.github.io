@@ -45,12 +45,11 @@
         }
     </style>
 </head>
-<!-- ★★★ 修正点: flexboxによる中央揃えと高さ固定を解除し、自然なスクロールを許可 ★★★ -->
 <body class="bg-yellow-50 text-gray-800">
 
     <!-- ========== タイトル画面 ========== -->
-    <!-- ★★★ 修正点: 上下のpaddingを調整し、画面サイズに応じた左右のpaddingを設定 ★★★ -->
-    <div id="title-screen" class="w-full max-w-2xl mx-auto py-8 px-4 sm:px-8 text-center">
+    <!-- ★★★ 修正点: 下に余白を追加して音量アイコンとの重なりを防ぐ ★★★ -->
+    <div id="title-screen" class="w-full max-w-2xl mx-auto pt-8 pb-24 px-4 sm:px-8 text-center">
         <h1 class="text-4xl md:text-6xl text-orange-500 mb-8 drop-shadow-md">デジタル神経衰弱</h1>
 
         <div class="bg-white p-6 rounded-2xl shadow-lg border-2 border-orange-200">
@@ -90,7 +89,7 @@
     </div>
 
     <!-- ========== ゲーム画面 ========== -->
-    <div id="game-screen" class="hidden w-full h-full flex flex-col p-4">
+    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4">
         <div class="flex justify-between items-start mb-2">
             <!-- タイトルへ戻るボタン -->
             <button id="back-to-title-btn" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
@@ -116,7 +115,8 @@
     </div>
     
     <!-- ========== 音量調整 ========== -->
-    <div class="absolute bottom-4 left-4">
+    <!-- ★★★ 修正点: absoluteをfixedに変更し、z-10を追加 ★★★ -->
+    <div class="fixed bottom-4 left-4 z-10">
         <button id="volume-settings-btn" class="w-14 h-14 flex items-center justify-center bg-pink-400 hover:bg-pink-500 text-white font-bold rounded-full shadow-lg transition-transform transform hover:scale-105">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
         </button>
