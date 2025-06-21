@@ -1,0 +1,379 @@
+:root {
+    --primary-color: #4a90e2;
+    --primary-dark-color: #357ABD;
+    --secondary-color: #f5a623;
+    --background-color: #f4f7f6;
+    --font-color: #333;
+    --light-gray-color: #ddd;
+    --white-color: #fff;
+    --card-size: 120px; /* カードの初期サイズ */
+    --gap-size: 15px;
+    --danger-color: #d9534f;
+}
+
+/* 基本スタイル */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--font-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+h1, h2 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+/* スクリーン切り替え */
+.screen {
+    width: 100%;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+}
+.screen.active {
+    display: flex;
+}
+
+/* --- 設定画面 --- */
+.main-header {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--light-gray-color);
+    flex-shrink: 0;
+}
+
+#setup-main {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.5rem 2rem;
+}
+
+.setup-step {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+}
+.setup-step.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.selection-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.select-btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    transition: background-color 0.3s, transform 0.1s;
+}
+.select-btn:hover {
+    background-color: var(--primary-dark-color);
+}
+.select-btn:active {
+    transform: scale(0.98);
+}
+
+#image-preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px dashed var(--light-gray-color);
+    border-radius: 8px;
+    min-height: 150px;
+}
+.preview-placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #999;
+    align-self: center;
+}
+.preview-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    justify-self: center;
+}
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.remove-btn {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 24px;
+    height: 24px;
+    background-color: var(--danger-color);
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+.remove-btn:hover {
+    transform: scale(1.1);
+}
+
+.choice-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.choice-label input[type="radio"] {
+    display: none;
+}
+.choice-box {
+    padding: 1.5rem;
+    border: 2px solid var(--light-gray-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.choice-box:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+}
+.choice-label input[type="radio"]:checked + .choice-box {
+    border-color: var(--primary-color);
+    background-color: #eaf2fb;
+}
+.choice-box h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--font-color);
+}
+.choice-box p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.navigation-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--light-gray-color);
+    background-color: var(--white-color);
+    flex-shrink: 0;
+}
+.nav-btn {
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    background-color: var(--white-color);
+    color: var(--primary-color);
+    font-weight: bold;
+    transition: all 0.3s;
+}
+#next-btn {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+.nav-btn:disabled {
+    background-color: var(--light-gray-color);
+    border-color: var(--light-gray-color);
+    color: #999;
+    cursor: not-allowed;
+}
+.nav-btn:not(:disabled):hover {
+    background-color: var(--primary-dark-color);
+    border-color: var(--primary-dark-color);
+    color: var(--white-color);
+}
+#back-btn:not(:disabled):hover {
+    background-color: #f0f0f0;
+}
+
+/* --- ゲーム画面 --- */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    flex-shrink: 0;
+}
+
+.game-control-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid var(--light-gray-color);
+    border-radius: 8px;
+    background-color: var(--white-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+.game-control-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+.icon-btn {
+    font-size: 1.2rem;
+    padding: 8px 12px;
+}
+.zoom-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#game-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: auto;
+    padding: 1rem;
+}
+#game-board {
+    display: grid;
+    gap: var(--gap-size);
+    perspective: 1000px;
+}
+
+.card {
+    width: var(--card-size);
+    height: var(--card-size);
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.6s, opacity 0.5s;
+    transform-style: preserve-3d;
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.card-front {
+    background-color: var(--white-color);
+    /* 画像の表示方法はJSでスタイルを直接設定 */
+}
+
+.card-back {
+    background: linear-gradient(135deg, var(--primary-color), #6ab1f8);
+    color: var(--white-color);
+    font-size: calc(var(--card-size) * 0.6);
+    font-weight: bold;
+    transform: rotateY(180deg);
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+.card.matched {
+    transform: scale(0.9);
+    opacity: 0;
+    cursor: default;
+}
+
+/* かんたんモードで選択されたカードのスタイル */
+.card.selected .card-front {
+    box-shadow: 0 0 0 4px var(--secondary-color);
+}
+
+#next-turn-btn {
+    position: absolute;
+    bottom: 2rem;
+    z-index: 100;
+}
+#next-turn-btn:not(:disabled):hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--white-color);
+}
+
+/* クリアメッセージ */
+.clear-message-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.clear-message-container.show {
+    display: flex;
+    opacity: 1;
+}
+.clear-message-box {
+    background-color: var(--white-color);
+    padding: 3rem 4rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: scale(0.7);
+    animation: popUp 0.5s forwards cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+.clear-message-box p {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--secondary-color);
+    margin: 0 0 1.5rem 0;
+}
+.clear-message-box button {
+    padding: 10px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    transition: background-color 0.3s;
+}
+.clear-message-box button:hover {
+    background-color: var(--primary-dark-color);
+}
+
+@keyframes popUp {
+    to { transform: scale(1); }
+}
