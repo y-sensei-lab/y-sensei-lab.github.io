@@ -10,7 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;700&display=swap');
         
         :root {
-            --c-bg: #f9fafb; /* Tailwind gray-50 */
+            --c-bg: #fffbeb; /* Light Yellow */
             --c-cyan: #5fc1c7;
             --c-dark-blue: #1d4763;
             --c-black: #060500;
@@ -55,35 +55,32 @@
 </head>
 <body class="bg-[var(--c-bg)] text-[var(--c-black)]">
 
-    <!-- ========== タイトル画面 ========== -->
     <div id="title-screen" class="w-full max-w-2xl mx-auto pt-8 pb-24 px-4 sm:px-8 text-center">
         <h1 class="text-4xl md:text-6xl text-[var(--c-dark-blue)] mb-8 drop-shadow-md">デジタル神経衰弱</h1>
 
-        <!-- ステップ1: 画像選択 -->
         <div id="step1-container">
             <div id="image-selection-section" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">1. 画像を選ぶ</h2>
                 <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>同じ画像が2枚で1ペアになります。</p>
                 <div class="grid md:grid-cols-2 gap-4">
                     <label for="folder-input" class="w-full bg-[var(--c-cyan)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
-                        <span>フォルダを選択 (まとめて)</span>
+                        <span>フォルダでまとめて選択</span>
                     </label>
                     <input type="file" id="folder-input" webkitdirectory directory multiple>
 
-                    <label for="files-input" class="w-full bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
-                        <span>画像を1枚ずつ選択</span>
+                    <label for="files-input" class="w-full bg-[var(--c-cyan)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                        <span>1枚ずつ選択</span>
                     </label>
                     <input type="file" id="files-input" multiple accept="image/*">
                 </div>
                  <div id="image-preview-area" class="flex flex-wrap justify-center gap-4 mt-6 hidden"></div>
                  <p id="image-info" class="text-gray-600 hidden mt-4"></p>
             </div>
-            <div class="flex justify-end gap-4 mt-4">
-                 <button id="confirm-images-btn" class="w-1/2 bg-[var(--c-gray)] text-white font-bold p-3 rounded-xl shadow-md cursor-not-allowed" disabled>決定</button>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div></div> <button id="confirm-images-btn" class="w-full bg-[var(--c-gray)] text-white font-bold p-3 rounded-xl shadow-md cursor-not-allowed transition-transform transform hover:scale-105" disabled>決定</button>
             </div>
         </div>
         
-        <!-- ステップ2: 表示方法選択 -->
         <div id="step2-container" class="hidden">
             <div id="image-fit-selection" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">2. 画像の表示方法を選ぶ</h2>
@@ -100,13 +97,12 @@
                     </button>
                 </div>
             </div>
-            <div class="flex justify-between gap-4 mt-4">
-                <button id="back-to-step1-btn" class="w-1/2 bg-[var(--c-gray)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">戻る</button>
-                <button id="confirm-fit-btn" class="w-1/2 bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">決定</button>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <button id="back-to-step1-btn" class="w-full bg-[var(--c-gray)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">戻る</button>
+                <button id="confirm-fit-btn" class="w-full bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">決定</button>
             </div>
         </div>
 
-        <!-- ステップ3: 難易度選択 -->
         <div id="step3-container" class="hidden">
             <div id="difficulty-selection" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">3. 難易度を選ぶ</h2>
@@ -123,14 +119,13 @@
                     </button>
                 </div>
             </div>
-            <div class="flex justify-between gap-4 mt-4">
-                <button id="back-to-step2-btn" class="w-1/2 bg-[var(--c-gray)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">戻る</button>
-                <button id="start-game-btn" class="w-1/2 bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">ゲーム開始</button>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <button id="back-to-step2-btn" class="w-full bg-[var(--c-gray)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">戻る</button>
+                <button id="start-game-btn" class="w-full bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold p-3 rounded-xl shadow-md transition-transform transform hover:scale-105">ゲーム開始</button>
             </div>
         </div>
     </div>
 
-    <!-- ========== ゲーム画面 ========== -->
     <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4">
         <div class="flex justify-between items-start mb-2">
             <button id="back-to-title-btn" class="bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
@@ -283,29 +278,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateStep1ConfirmButtonState = () => {
         const isReady = selectedImages.length > 0;
         confirmImagesBtn.disabled = !isReady;
-        confirmImagesBtn.style.backgroundColor = isReady ? 'var(--c-cyan)' : 'var(--c-gray)';
+        confirmImagesBtn.style.backgroundColor = isReady ? 'var(--c-dark-blue)' : 'var(--c-gray)';
         if(isReady) {
             confirmImagesBtn.classList.remove('cursor-not-allowed');
+            confirmImagesBtn.classList.add('hover:brightness-95');
         } else {
             confirmImagesBtn.classList.add('cursor-not-allowed');
+            confirmImagesBtn.classList.remove('hover:brightness-95');
             imageInfo.classList.add('hidden');
         }
     };
     
-    const handleFileSelection = (files) => {
-        // ★★★ 修正点: ユーザーがファイル選択をキャンセルした場合、何もしない ★★★
-        if (files.length === 0) {
+    const handleFileSelection = (e) => {
+        const input = e.target;
+        const files = input.files;
+        const inputId = input.id;
+
+        if (!files || files.length === 0) {
+            input.value = '';
             return;
         }
+
+        if (inputId === 'folder-input') {
+            selectedImages = [];
+        }
         
-        selectedImages = [];
         const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
         
         imageInfo.classList.remove('hidden');
 
         if (imageFiles.length === 0) {
             imageInfo.textContent = '画像ファイルが見つかりませんでした。';
-            updateStep1ConfirmButtonState();
+            input.value = '';
             return;
         }
 
@@ -321,17 +325,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         Promise.all(readerPromises).then(results => {
-            selectedImages = results;
+            const uniqueNewImages = results.filter(src => !selectedImages.includes(src));
+            selectedImages.push(...uniqueNewImages);
+
             updateImagePreview();
             imageInfo.textContent = `${selectedImages.length}枚の画像を選択しました。`;
             updateStep1ConfirmButtonState();
         }).catch(error => {
             console.error("画像読み込みエラー:", error);
             imageInfo.textContent = '画像の読み込みに失敗しました。';
+        }).finally(() => {
+            input.value = ''; 
         });
     };
     
-    // ★★★ 新機能: 画像を個別に削除する ★★★
     const removeImage = (srcToRemove) => {
         playSfx(sfx.button);
         selectedImages = selectedImages.filter(src => src !== srcToRemove);
@@ -372,8 +379,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    folderInput.addEventListener('change', (e) => { playSfx(sfx.button); filesInput.value = ''; handleFileSelection(e.target.files); });
-    filesInput.addEventListener('change', (e) => { playSfx(sfx.button); folderInput.value = ''; handleFileSelection(e.target.files); });
+    folderInput.addEventListener('change', (e) => { playSfx(sfx.button); handleFileSelection(e); });
+    filesInput.addEventListener('change', (e) => { playSfx(sfx.button); handleFileSelection(e); });
     confirmImagesBtn.addEventListener('click', () => { playSfx(sfx.button); showStep(2); });
 
     // ========== ステップ2: 表示方法選択 ==========
@@ -393,6 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const isEasy = difficulty === 'easy';
         easyModeBtn.style.backgroundColor = isEasy ? 'var(--c-cyan)' : 'var(--c-gray)';
         hardModeBtn.style.backgroundColor = !isEasy ? 'var(--c-cyan)' : 'var(--c-gray)';
+        easyModeBtn.style.color = 'white';
+        hardModeBtn.style.color = 'white';
     };
 
     easyModeBtn.addEventListener('click', () => { playSfx(sfx.button); difficulty = 'easy'; updateDifficultyButtons(); });
