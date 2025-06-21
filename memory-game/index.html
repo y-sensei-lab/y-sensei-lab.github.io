@@ -70,7 +70,7 @@
                     </label>
                     <input type="file" id="folder-input" webkitdirectory directory multiple>
 
-                    <label for="files-input" class="w-full bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
+                    <label for="files-input" class="w-full bg-[var(--c-cyan)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                         <span>画像を追加選択</span>
                     </label>
                     <input type="file" id="files-input" multiple accept="image/*">
@@ -237,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let difficulty = 'easy';
     let firstCard = null, secondCard = null, lockBoard = false;
     let pairsFound = 0, totalPairs = 0, currentCardSize = 128;
+    let audioUnlocked = false;
 
     // ========== 音量管理 ==========
     const loadVolumeSettings = () => {
@@ -248,7 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const applyVolumeSettings = () => {
         bgm.volume = bgmVolumeSlider.value * 0.25;
-        Object.values(sfx).forEach(sound => sound.volume = sfxVolumeSlider.value);
+        // iOSで音量変更を適用させるためにBGMを再生（既に再生中なら何も起こらない）
+        if (!bgm.paused) {
+            bgm.play().catch(()=>{});
+        }
+        
+        Object.values(sfx).forEach(sound => {
+            sound.volume = sfxVolumeSlider.value;
+        });
     };
     const saveVolumeSettings = () => {
         localStorage.setItem('bgmVolume', bgmVolumeSlider.value);
@@ -270,16 +278,25 @@ document.addEventListener('DOMContentLoaded', () => {
         step3Container.classList.toggle('hidden', step !== 3);
     };
     
-    // ★★★ 修正点: iPad/iPhoneでの音声再生を有効化する関数 ★★★
     const unlockAudio = () => {
-        bgm.play().catch(() => {});
-        Object.values(sfx).forEach(sound => {
-            sound.play().catch(() => {});
-            sound.pause();
-            sound.currentTime = 0;
+        if (audioUnlocked) return;
+        
+        const allSounds = [bgm, ...Object.values(sfx)];
+        allSounds.forEach(sound => {
+            const playPromise = sound.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {}).then(() => {
+                    sound.pause();
+                    sound.currentTime = 0;
+                });
+            }
         });
-        applyVolumeSettings();
+        audioUnlocked = true;
+        console.log("Audio Unlocked");
+        bgm.play().catch(e => console.log("BGM play failed on unlock"));
+        applyVolumeSettings(); // Unlock後に音量を適用
         document.body.removeEventListener('click', unlockAudio);
+        document.body.removeEventListener('touchstart', unlockAudio);
     };
     
     // ========== 初期化処理 ==========
@@ -287,7 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('title');
         resetGameStates();
         loadVolumeSettings();
-        document.body.addEventListener('click', unlockAudio, { once: true });
+        if (!audioUnlocked) {
+            document.body.addEventListener('click', unlockAudio, { once: true });
+            document.body.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+        }
     };
 
     // ========== ステップ1: 画像選択処理 ==========
@@ -570,15 +590,15 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { if (clearModal) clearModal.classList.add('hidden'); init(); }, 300);
     });
     volumeSettingsBtn.addEventListener('click', () => { playSfx(sfx.button); if (volumeControls) volumeControls.classList.toggle('hidden'); });
-    bgmVolumeSlider.addEventListener('input', () => { applyVolumeSettings(); saveVolumeSettings(); });
-    sfxVolumeSlider.addEventListener('input', () => { applyVolumeSettings(); playSfx(sfx.button); saveVolumeSettings(); });
     
-    document.addEventListener('click', (event) => {
-        if (volumeControls && volumeSettingsBtn) {
-             if (!volumeControls.classList.contains('hidden') && !volumeControls.contains(event.target) && !volumeSettingsBtn.contains(event.target)) {
-                volumeControls.classList.add('hidden');
-            }
-        }
+    // ★★★ 修正点: iOSでの音量調整に対応 ★★★
+    bgmVolumeSlider.addEventListener('input', applyVolumeSettings);
+    sfxVolumeSlider.addEventListener('input', applyVolumeSettings);
+    
+    bgmVolumeSlider.addEventListener('change', saveVolumeSettings);
+    sfxVolumeSlider.addEventListener('change', () => {
+        playSfx(sfx.button);
+        saveVolumeSettings();
     });
 
     const adjustCardSize = (delta) => {
