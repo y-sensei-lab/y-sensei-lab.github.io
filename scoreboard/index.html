@@ -47,12 +47,12 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-2">
+<body class="bg-gray-100 h-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
-    <h1 class="text-3xl font-bold text-gray-800 mb-2 flex-shrink-0" style="font-family: 'Mochiy Pop One', sans-serif;">スコアトラッカー</h1>
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-4 flex-shrink-0" style="font-family: 'Mochiy Pop One', sans-serif;">スコアトラッカー</h1>
 
     <!-- 優勢バー -->
-    <div class="w-full max-w-6xl mb-2 flex-shrink-0">
+    <div class="w-full max-w-6xl mb-2 md:mb-4 flex-shrink-0">
         <div class="flex h-6 rounded-full overflow-hidden bg-gray-300 shadow-inner">
             <div id="progress-bar-0" class="bg-blue-500 transition-all duration-500 ease-in-out" style="width: 50%;"></div>
             <div id="progress-bar-1" class="bg-red-500 transition-all duration-500 ease-in-out" style="width: 50%;"></div>
@@ -62,48 +62,48 @@
     <!-- チーム表示エリア -->
     <div id="teams-wrapper" class="w-full max-w-6xl flex-grow flex rounded-2xl overflow-hidden shadow-2xl bg-gray-200 min-h-0">
         <!-- チーム1 -->
-        <div id="team-0-container" class="w-1/2 bg-blue-500 p-3 flex flex-col items-center">
-            <input type="text" id="team-0-name" value="あおチーム" class="text-3xl font-bold text-white bg-transparent text-center rounded-lg p-2 mb-1 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
-            <div class="text-7xl font-bold text-white mb-2 flex-shrink-0" id="team-0-total-score">0</div>
+        <div id="team-0-container" class="w-1/2 bg-blue-500 p-2 md:p-4 flex flex-col items-center">
+            <input type="text" id="team-0-name" value="あおチーム" class="text-2xl md:text-3xl font-bold text-white bg-transparent text-center rounded-lg p-2 mb-1 md:mb-2 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
+            <div class="text-6xl md:text-8xl font-bold text-white mb-2 md:mb-4 flex-shrink-0" id="team-0-total-score">0</div>
             <div id="team-0-members" class="w-full flex-grow overflow-y-auto pr-2"></div>
-            <div class="mt-auto pt-2 w-full flex-shrink-0">
+            <div class="mt-auto pt-2 md:pt-4 w-full flex-shrink-0">
                 <div class="flex gap-2">
-                    <input type="text" id="member-name-0" class="w-full px-3 py-2 rounded-lg border-2 border-blue-200 focus:outline-none focus:ring-2 focus:ring-white" placeholder="メンバーの名前">
-                    <button onclick="addMember(0)" class="bg-white text-blue-500 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-50 transition-transform transform hover:scale-105">追加</button>
+                    <input type="text" id="member-name-0" class="w-full px-3 py-2 rounded-lg border-2 border-blue-200 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base" placeholder="メンバーの名前">
+                    <button onclick="addMember(0)" class="bg-white text-blue-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-blue-50 transition-transform transform hover:scale-105">追加</button>
                 </div>
             </div>
         </div>
 
         <!-- チーム2 -->
-        <div id="team-1-container" class="w-1/2 bg-red-500 p-3 flex flex-col items-center">
-            <input type="text" id="team-1-name" value="あかチーム" class="text-3xl font-bold text-white bg-transparent text-center rounded-lg p-2 mb-1 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
-            <div class="text-7xl font-bold text-white mb-2 flex-shrink-0" id="team-1-total-score">0</div>
+        <div id="team-1-container" class="w-1/2 bg-red-500 p-2 md:p-4 flex flex-col items-center">
+            <input type="text" id="team-1-name" value="あかチーム" class="text-2xl md:text-3xl font-bold text-white bg-transparent text-center rounded-lg p-2 mb-1 md:mb-2 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
+            <div class="text-6xl md:text-8xl font-bold text-white mb-2 md:mb-4 flex-shrink-0" id="team-1-total-score">0</div>
             <div id="team-1-members" class="w-full flex-grow overflow-y-auto pr-2"></div>
-            <div class="mt-auto pt-2 w-full flex-shrink-0">
+            <div class="mt-auto pt-2 md:pt-4 w-full flex-shrink-0">
                 <div class="flex gap-2">
-                    <input type="text" id="member-name-1" class="w-full px-3 py-2 rounded-lg border-2 border-red-200 focus:outline-none focus:ring-2 focus:ring-white" placeholder="メンバーの名前">
-                    <button onclick="addMember(1)" class="bg-white text-red-500 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-red-50 transition-transform transform hover:scale-105">追加</button>
+                    <input type="text" id="member-name-1" class="w-full px-3 py-2 rounded-lg border-2 border-red-200 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base" placeholder="メンバーの名前">
+                    <button onclick="addMember(1)" class="bg-white text-red-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-red-50 transition-transform transform hover:scale-105">追加</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 操作ボタンエリア -->
-    <div class="flex gap-4 mt-4 flex-shrink-0">
-        <button onclick="resetScores()" class="bg-yellow-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-600 transition-transform transform hover:scale-105 text-lg">
+    <div class="flex gap-4 mt-4 sm:mt-6 flex-shrink-0">
+        <button onclick="resetScores()" class="bg-yellow-500 text-white font-bold py-2 px-4 text-base sm:py-3 sm:px-8 sm:text-lg rounded-full shadow-lg hover:bg-yellow-600 transition-transform transform hover:scale-105">
             点数リセット
         </button>
-        <button onclick="endGame()" class="bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 text-lg">
+        <button onclick="endGame()" class="bg-green-500 text-white font-bold py-2 px-4 text-base sm:py-3 sm:px-8 sm:text-lg rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
             ゲーム終了！
         </button>
     </div>
 
     <!-- 結果発表モーダル -->
-    <div id="result-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-        <div id="result-box" class="bg-white p-10 rounded-3xl shadow-2xl text-center transform scale-0 transition-transform duration-500 ease-in-out">
-            <h2 id="result-title" class="text-5xl font-bold mb-4" style="font-family: 'Mochiy Pop One', sans-serif;"></h2>
-            <p id="result-message" class="text-2xl text-gray-700"></p>
-            <p id="result-score" class="text-7xl font-bold my-6"></p>
+    <div id="result-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div id="result-box" class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl text-center transform scale-0 transition-transform duration-500 ease-in-out">
+            <h2 id="result-title" class="text-3xl sm:text-5xl font-bold mb-4" style="font-family: 'Mochiy Pop One', sans-serif;"></h2>
+            <p id="result-message" class="text-xl sm:text-2xl text-gray-700"></p>
+            <p id="result-score" class="text-5xl sm:text-7xl font-bold my-6"></p>
             <button onclick="closeModal()" class="mt-6 bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 text-lg">
                 もう一回！
             </button>
@@ -125,11 +125,31 @@
 
         // チーム名入力のイベントリスナーを設定
         function setupTeamNameListeners() {
-            document.getElementById('team-0-name').addEventListener('input', (e) => {
-                teams[0].name = e.target.value;
-            });
-            document.getElementById('team-1-name').addEventListener('input', (e) => {
-                teams[1].name = e.target.value;
+            const teamNameInputs = [
+                document.getElementById('team-0-name'),
+                document.getElementById('team-1-name')
+            ];
+
+            teamNameInputs.forEach((input, index) => {
+                // データ属性に現在の名前を保存する
+                input.setAttribute('data-current-name', input.value);
+
+                input.addEventListener('focus', (e) => {
+                    // フォーカスが当たったら入力フィールドをクリアする
+                    e.target.value = '';
+                });
+
+                input.addEventListener('blur', (e) => {
+                    if (e.target.value.trim() === '') {
+                        // 入力が空のままフォーカスが外れたら、保存しておいた名前に戻す
+                        e.target.value = e.target.getAttribute('data-current-name');
+                    } else {
+                        // 新しい名前が入力されたら、データ属性を更新する
+                        e.target.setAttribute('data-current-name', e.target.value);
+                    }
+                    // チームデータオブジェクトを最終的な値で更新する
+                    teams[index].name = e.target.value;
+                });
             });
         }
         
@@ -148,20 +168,19 @@
                 
                 const memberListWrapper = document.createElement('div');
 
-                // メンバーが6人以上になったら2列にする
+                // メンバーが一定数以上になったら2列にする
                 if (team.members.length > 5) {
-                    memberListWrapper.className = 'grid grid-cols-2 gap-2';
+                    memberListWrapper.className = 'grid grid-cols-1 sm:grid-cols-2 gap-1';
                 } else {
-                    memberListWrapper.className = 'space-y-2';
+                    memberListWrapper.className = 'space-y-1';
                 }
 
                 team.members.forEach((member, memberIndex) => {
                     const memberDiv = document.createElement('div');
-                    memberDiv.className = 'flex items-center justify-between bg-white bg-opacity-30 rounded-lg p-2 shadow';
+                    memberDiv.className = 'flex items-center justify-between bg-white bg-opacity-30 rounded-lg p-1 md:p-2 shadow';
                     
                     const memberName = document.createElement('span');
-                    // 2列表示の際はフォントを少し小さくする
-                    const nameFontSize = team.members.length > 5 ? 'text-base' : 'text-lg';
+                    const nameFontSize = team.members.length > 5 ? 'text-sm sm:text-base' : 'text-base sm:text-lg';
                     memberName.className = `text-white font-semibold flex-grow ${nameFontSize}`;
                     memberName.textContent = member.name;
                     
@@ -170,12 +189,12 @@
 
                     const minusButton = document.createElement('button');
                     minusButton.textContent = '－';
-                    minusButton.className = 'w-6 h-6 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
+                    minusButton.className = 'w-5 h-5 sm:w-6 sm:h-6 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
                     minusButton.onclick = () => changeScore(teamIndex, memberIndex, -1);
 
                     const scoreInput = document.createElement('input');
                     scoreInput.type = 'number';
-                    scoreInput.className = 'score-input w-12 text-center text-lg font-bold bg-white rounded-md p-1 shadow-inner';
+                    scoreInput.className = 'score-input w-10 text-base sm:w-12 sm:text-lg font-bold bg-white rounded-md p-1 shadow-inner text-center';
                     scoreInput.value = member.score;
                     scoreInput.min = "0"; // マイナス点を入力できないように
                     scoreInput.addEventListener('input', (e) => {
@@ -191,12 +210,12 @@
 
                     const plusButton = document.createElement('button');
                     plusButton.textContent = '＋';
-                    plusButton.className = 'w-6 h-6 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
+                    plusButton.className = 'w-5 h-5 sm:w-6 sm:h-6 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
                     plusButton.onclick = () => changeScore(teamIndex, memberIndex, 1);
 
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = '✕';
-                    deleteButton.className = 'mr-2 text-white font-bold hover:text-red-200 text-xl';
+                    deleteButton.className = 'mr-2 text-white font-bold hover:text-red-200 text-lg sm:text-xl';
                     deleteButton.onclick = () => {
                         deleteMember(teamIndex, memberIndex);
                     };
