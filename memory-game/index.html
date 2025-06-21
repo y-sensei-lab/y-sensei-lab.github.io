@@ -132,7 +132,7 @@
     </div>
 
     <!-- ========== ゲーム画面 ========== -->
-    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4 relative">
+    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4">
         <div class="flex justify-between items-start mb-2">
             <button id="back-to-title-btn" class="bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
                 タイトルに戻る
@@ -149,7 +149,6 @@
         <div id="game-board-container" class="flex-grow flex items-center justify-center overflow-auto">
              <div id="game-board" class="grid gap-2 md:gap-4 p-4"></div>
         </div>
-        <!-- ★★★ 修正点: アクションボタンを追加 ★★★ -->
         <div id="action-buttons" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
             <button id="next-pair-btn" class="hidden bg-[var(--c-dark-blue)] text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform transform hover:scale-105">次へ</button>
             <button id="return-cards-btn" class="hidden bg-[var(--c-dark-blue)] text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform transform hover:scale-105">戻す</button>
@@ -252,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const playSfx = (sound) => {
         if (!isMuted && audioUnlocked) {
-             const audio = new Audio(sound.src);
-             audio.play().catch(e => console.error("SFX play error:", e));
+             sound.currentTime = 0;
+             sound.play().catch(e => console.error("SFX play error:", e));
         }
     };
 
@@ -271,18 +270,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const unlockAudio = () => {
         if (audioUnlocked) return;
         
-        const allSounds = Object.values(sfx);
-        allSounds.forEach(sound => {
-            sound.volume = 0;
-            const playPromise = sound.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {}).then(() => {
-                    sound.pause();
-                    sound.currentTime = 0;
-                    sound.volume = 1; 
-                });
-            }
-        });
+        const unlockPromise = sfx.button.play();
+        if (unlockPromise !== undefined) {
+            unlockPromise.catch(error => {}).then(() => {
+                sfx.button.pause();
+                sfx.button.currentTime = 0;
+            });
+        }
+        
         audioUnlocked = true;
         console.log("Audio Unlocked");
         document.body.removeEventListener('click', unlockAudio);
