@@ -164,7 +164,7 @@
 
                 // 表示領域の高さと行の高さから、表示可能な行数を計算
                 const availableHeight = membersContainer.offsetHeight;
-                const rowHeight = window.innerWidth < 640 ? 46 : 50; // モバイルとPCで行の高さを調整
+                const rowHeight = window.innerWidth < 640 ? 50 : 54; // モバイルとPCで行の高さを調整
                 const maxInCol = Math.max(1, Math.floor(availableHeight / rowHeight));
                 const maxTotal = maxInCol * 2;
 
