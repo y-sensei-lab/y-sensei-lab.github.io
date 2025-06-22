@@ -132,7 +132,7 @@
     </div>
 
     <!-- ========== ゲーム画面 ========== -->
-    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4">
+    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4 relative">
         <div class="flex justify-between items-start mb-2">
             <button id="back-to-title-btn" class="bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
                 タイトルに戻る
@@ -149,7 +149,8 @@
         <div id="game-board-container" class="flex-grow flex items-center justify-center overflow-auto">
              <div id="game-board" class="grid gap-2 md:gap-4 p-4"></div>
         </div>
-        <div id="action-buttons" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
+        <!-- ★★★ 修正点: ボタンの配置を右下に変更 ★★★ -->
+        <div id="action-buttons" class="absolute bottom-8 right-8 flex gap-4 z-10">
             <button id="next-pair-btn" class="hidden bg-[var(--c-dark-blue)] text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform transform hover:scale-105">次へ</button>
             <button id="return-cards-btn" class="hidden bg-[var(--c-dark-blue)] text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform transform hover:scale-105">戻す</button>
         </div>
@@ -164,11 +165,11 @@
         </div>
     </div>
 
-    <audio id="sfx-button" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_button.mp3" preload="auto"></audio>
-    <audio id="sfx-open" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_open.mp3" preload="auto"></audio>
-    <audio id="sfx-pair" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_pair.mp3" preload="auto"></audio>
-    <audio id="sfx-fail" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_fail.mp3" preload="auto"></audio>
-    <audio id="sfx-clear" src="https://y-sensei-lab.github.io/memory-game/audio/sfx_clear.mp3" preload="auto"></audio>
+    <audio id="sfx-button" preload="auto"></audio>
+    <audio id="sfx-open" preload="auto"></audio>
+    <audio id="sfx-pair" preload="auto"></audio>
+    <audio id="sfx-fail" preload="auto"></audio>
+    <audio id="sfx-clear" preload="auto"></audio>
 
 
 <script>
@@ -223,11 +224,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let pairsFound = 0, totalPairs = 0, currentCardSize = 128;
     let audioUnlocked = false;
 
-    // ========== 音量管理 ==========
+    // ========== 音声関連 ==========
+    const setupAudio = () => {
+        const isApple = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const audioExtension = isApple ? '.m4a' : '.mp3';
+        const basePath = 'https://y-sensei-lab.github.io/memory-game/audio/';
+        
+        for (const key in sfx) {
+            if (sfx.hasOwnProperty(key)) {
+                sfx[key].src = `${basePath}${key}${audioExtension}`;
+            }
+        }
+    };
+    
     const playSfx = (sound) => {
         if (audioUnlocked) {
              sound.currentTime = 0;
-             sound.play().catch(e => console.error("SFX play error:", e));
+             sound.play().catch(e => {});
         }
     };
 
@@ -245,22 +258,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const unlockAudio = () => {
         if (audioUnlocked) return;
         
-        const unlockPromise = sfx.button.play();
-        if (unlockPromise !== undefined) {
-            unlockPromise.catch(error => {}).then(() => {
-                sfx.button.pause();
-                sfx.button.currentTime = 0;
+        const unlockPromises = Object.values(sfx).map(sound => {
+            return new Promise((resolve) => {
+                const playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                        resolve();
+                    }).catch(error => {
+                        resolve();
+                    });
+                } else {
+                    resolve();
+                }
             });
-        }
+        });
         
-        audioUnlocked = true;
-        console.log("Audio Unlocked");
+        Promise.all(unlockPromises).then(() => {
+            audioUnlocked = true;
+            console.log("Audio Unlocked");
+        });
+
         document.body.removeEventListener('click', unlockAudio);
         document.body.removeEventListener('touchstart', unlockAudio);
     };
     
     // ========== 初期化処理 ==========
     const init = () => {
+        setupAudio();
         showScreen('title');
         resetGameStates();
         if (!audioUnlocked) {
