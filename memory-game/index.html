@@ -63,7 +63,7 @@
         <div id="step1-container">
             <div id="image-selection-section" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">1. 画像を選ぶ</h2>
-                <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>画像が複製されて2枚1ペアになります。</p>
+                <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>同じ画像が2枚で1ペアになります。</p>
                 <div class="grid md:grid-cols-2 gap-4">
                     <label for="folder-input" class="w-full bg-[var(--c-cyan)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                         <span>フォルダでまとめて選択</span>
@@ -132,7 +132,7 @@
     </div>
 
     <!-- ========== ゲーム画面 ========== -->
-    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4 relative">
+    <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4">
         <div class="flex justify-between items-start mb-2">
             <button id="back-to-title-btn" class="bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
                 タイトルに戻る
@@ -149,8 +149,7 @@
         <div id="game-board-container" class="flex-grow flex items-center justify-center overflow-auto">
              <div id="game-board" class="grid gap-2 md:gap-4 p-4"></div>
         </div>
-        <!-- ★★★ 修正点: ボタンの配置を右下に変更 ★★★ -->
-        <div id="action-buttons" class="absolute bottom-8 right-8 flex gap-4 z-10">
+        <div id="action-buttons" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
             <button id="next-pair-btn" class="hidden bg-[var(--c-dark-blue)] text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform transform hover:scale-105">次へ</button>
             <button id="return-cards-btn" class="hidden bg-[var(--c-dark-blue)] text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform transform hover:scale-105">戻す</button>
         </div>
@@ -165,15 +164,82 @@
         </div>
     </div>
 
-    <audio id="sfx-button" preload="auto"></audio>
-    <audio id="sfx-open" preload="auto"></audio>
-    <audio id="sfx-pair" preload="auto"></audio>
-    <audio id="sfx-fail" preload="auto"></audio>
-    <audio id="sfx-clear" preload="auto"></audio>
-
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ========== Web Audio APIのセットアップ ==========
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioContext;
+    const audioBuffers = {};
+    let audioContextResumed = false;
+
+    // オーディオコンテキストを初期化/再開する関数
+    const resumeAudioContext = async () => {
+        if (!audioContext) {
+            audioContext = new AudioContext();
+        }
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
+        if (!audioContextResumed) {
+            audioContextResumed = true;
+            console.log("AudioContext is active.");
+            // 最初にロードを開始
+            await setupAudio(); 
+        }
+        document.body.removeEventListener('click', resumeAudioContext);
+        document.body.removeEventListener('touchstart', resumeAudioContext);
+    };
+
+    // 音声ファイルをロードしてデコードする関数
+    const loadAudioFile = async (url) => {
+        try {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            return audioBuffer;
+        } catch (error) {
+            console.error(`Error loading audio file ${url}:`, error);
+            return null;
+        }
+    };
+    
+    // 全ての効果音をセットアップする関数
+    const setupAudio = async () => {
+        const sfxSources = {
+            button: 'https://y-sensei-lab.github.io/memory-game/audio/sfx_button.mp3',
+            open: 'https://y-sensei-lab.github.io/memory-game/audio/sfx_open.mp3',
+            pair: 'https://y-sensei-lab.github.io/memory-game/audio/sfx_pair.mp3',
+            fail: 'https://y-sensei-lab.github.io/memory-game/audio/sfx_fail.mp3',
+            clear: 'https://y-sensei-lab.github.io/memory-game/audio/sfx_clear.mp3'
+        };
+        const loadPromises = [];
+        for (const key in sfxSources) {
+            loadPromises.push(
+                loadAudioFile(sfxSources[key]).then(buffer => {
+                    if (buffer) {
+                        audioBuffers[key] = buffer;
+                    }
+                })
+            );
+        }
+        await Promise.all(loadPromises);
+        console.log("All audio files have been loaded and decoded.");
+    };
+
+    // 効果音を再生する関数
+    const playSfx = (name) => {
+        if (!audioContextResumed || !audioBuffers[name] || !audioContext) return;
+        try {
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffers[name];
+            source.connect(audioContext.destination);
+            source.start(0);
+        } catch (error) {
+            console.error(`Error playing sound ${name}:`, error);
+        }
+    };
+
 
     // ========== DOM要素の取得 ==========
     const titleScreen = document.getElementById('title-screen');
@@ -209,12 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const nextPairBtn = document.getElementById('next-pair-btn');
     const returnCardsBtn = document.getElementById('return-cards-btn');
-    
-    const sfx = {
-        button: document.getElementById('sfx-button'), open: document.getElementById('sfx-open'),
-        pair: document.getElementById('sfx-pair'), fail: document.getElementById('sfx-fail'),
-        clear: document.getElementById('sfx-clear'),
-    };
 
     // ========== ゲームの状態管理 ==========
     let selectedImages = [];
@@ -222,27 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let difficulty = 'easy';
     let firstCard = null, secondCard = null, lockBoard = false;
     let pairsFound = 0, totalPairs = 0, currentCardSize = 128;
-    let audioUnlocked = false;
-
-    // ========== 音声関連 ==========
-    const setupAudio = () => {
-        const isApple = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const audioExtension = isApple ? '.m4a' : '.mp3';
-        const basePath = 'https://y-sensei-lab.github.io/memory-game/audio/';
-        
-        for (const key in sfx) {
-            if (sfx.hasOwnProperty(key)) {
-                sfx[key].src = `${basePath}${key}${audioExtension}`;
-            }
-        }
-    };
-    
-    const playSfx = (sound) => {
-        if (audioUnlocked) {
-             sound.currentTime = 0;
-             sound.play().catch(e => {});
-        }
-    };
 
     // ========== 画面・ステップ遷移 ==========
     const showScreen = (screen) => {
@@ -255,44 +294,13 @@ document.addEventListener('DOMContentLoaded', () => {
         step3Container.classList.toggle('hidden', step !== 3);
     };
     
-    const unlockAudio = () => {
-        if (audioUnlocked) return;
-        
-        const unlockPromises = Object.values(sfx).map(sound => {
-            return new Promise((resolve) => {
-                const playPromise = sound.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        sound.pause();
-                        sound.currentTime = 0;
-                        resolve();
-                    }).catch(error => {
-                        resolve();
-                    });
-                } else {
-                    resolve();
-                }
-            });
-        });
-        
-        Promise.all(unlockPromises).then(() => {
-            audioUnlocked = true;
-            console.log("Audio Unlocked");
-        });
-
-        document.body.removeEventListener('click', unlockAudio);
-        document.body.removeEventListener('touchstart', unlockAudio);
-    };
-    
     // ========== 初期化処理 ==========
     const init = () => {
-        setupAudio();
         showScreen('title');
         resetGameStates();
-        if (!audioUnlocked) {
-            document.body.addEventListener('click', unlockAudio, { once: true });
-            document.body.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
-        }
+        // ユーザーの操作を待ってオーディオコンテキストを初期化
+        document.body.addEventListener('click', resumeAudioContext, { once: true });
+        document.body.addEventListener('touchstart', resumeAudioContext, { once: true, passive: true });
     };
 
     // ========== ステップ1: 画像選択処理 ==========
@@ -361,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const removeImage = (srcToRemove) => {
-        playSfx(sfx.button);
+        playSfx('button');
         selectedImages = selectedImages.filter(src => src !== srcToRemove);
         updateImagePreview();
         updateStep1ConfirmButtonState();
@@ -400,9 +408,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    folderInput.addEventListener('change', (e) => { playSfx(sfx.button); handleFileSelection(e); });
-    filesInput.addEventListener('change', (e) => { playSfx(sfx.button); handleFileSelection(e); });
-    confirmImagesBtn.addEventListener('click', () => { playSfx(sfx.button); showStep(2); });
+    folderInput.addEventListener('change', (e) => { playSfx('button'); handleFileSelection(e); });
+    filesInput.addEventListener('change', (e) => { playSfx('button'); handleFileSelection(e); });
+    confirmImagesBtn.addEventListener('click', () => { playSfx('button'); showStep(2); });
 
     // ========== ステップ2: 表示方法選択 ==========
     const updateFitButtons = () => {
@@ -411,10 +419,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fitContainBtn.style.backgroundColor = !isCover ? 'var(--c-cyan)' : 'var(--c-gray)';
     };
 
-    fitCoverBtn.addEventListener('click', () => { playSfx(sfx.button); imageFit = 'cover'; updateFitButtons(); });
-    fitContainBtn.addEventListener('click', () => { playSfx(sfx.button); imageFit = 'contain'; updateFitButtons(); });
-    confirmFitBtn.addEventListener('click', () => { playSfx(sfx.button); showStep(3); });
-    backToStep1Btn.addEventListener('click', () => { playSfx(sfx.button); showStep(1); });
+    fitCoverBtn.addEventListener('click', () => { playSfx('button'); imageFit = 'cover'; updateFitButtons(); });
+    fitContainBtn.addEventListener('click', () => { playSfx('button'); imageFit = 'contain'; updateFitButtons(); });
+    confirmFitBtn.addEventListener('click', () => { playSfx('button'); showStep(3); });
+    backToStep1Btn.addEventListener('click', () => { playSfx('button'); showStep(1); });
 
     // ========== ステップ3: 難易度選択 ==========
     const updateDifficultyButtons = () => {
@@ -425,10 +433,10 @@ document.addEventListener('DOMContentLoaded', () => {
         hardModeBtn.style.color = 'white';
     };
 
-    easyModeBtn.addEventListener('click', () => { playSfx(sfx.button); difficulty = 'easy'; updateDifficultyButtons(); });
-    hardModeBtn.addEventListener('click', () => { playSfx(sfx.button); difficulty = 'hard'; updateDifficultyButtons(); });
-    backToStep2Btn.addEventListener('click', () => { playSfx(sfx.button); showStep(2); });
-    startGameBtn.addEventListener('click', () => { playSfx(sfx.button); startGame(); });
+    easyModeBtn.addEventListener('click', () => { playSfx('button'); difficulty = 'easy'; updateDifficultyButtons(); });
+    hardModeBtn.addEventListener('click', () => { playSfx('button'); difficulty = 'hard'; updateDifficultyButtons(); });
+    backToStep2Btn.addEventListener('click', () => { playSfx('button'); showStep(2); });
+    startGameBtn.addEventListener('click', () => { playSfx('button'); startGame(); });
 
     // ========== ゲーム開始・進行ロジック ==========
     const startGame = () => {
@@ -475,14 +483,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (difficulty === 'hard') {
             if (card.classList.contains('is-flipped')) {
                 card.classList.remove('is-flipped');
-                setTimeout(() => playSfx(sfx.open), 200);
+                setTimeout(() => playSfx('open'), 200);
                 firstCard = null;
                 return;
             }
             card.classList.add('is-flipped');
-            setTimeout(() => playSfx(sfx.open), 200);
+            setTimeout(() => playSfx('open'), 200);
         } else {
-            playSfx(sfx.button);
+            playSfx('button');
             if (card.classList.contains('is-selected')) {
                  card.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
                  firstCard = null;
@@ -500,15 +508,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleMatch = () => {
         const sfxDelay = difficulty === 'hard' ? 800 : 500;
-        setTimeout(() => { playSfx(sfx.pair); }, sfxDelay);
+        setTimeout(() => { playSfx('pair'); }, sfxDelay);
         pairsFound++;
         firstCard.classList.add('is-matched');
         secondCard.classList.add('is-matched');
         
         if (pairsFound === totalPairs) {
             setTimeout(() => {
-                firstCard.style.visibility = 'hidden';
-                secondCard.style.visibility = 'hidden';
+                if (firstCard) firstCard.style.visibility = 'hidden';
+                if (secondCard) secondCard.style.visibility = 'hidden';
                 endGame();
             }, 1000);
             return;
@@ -518,12 +526,12 @@ document.addEventListener('DOMContentLoaded', () => {
             nextPairBtn.classList.remove('hidden');
         } else {
             setTimeout(() => {
-                if (difficulty === 'easy') {
+                if (difficulty === 'easy' && firstCard && secondCard) {
                     firstCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
                     secondCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
                 }
-                firstCard.style.visibility = 'hidden';
-                secondCard.style.visibility = 'hidden';
+                if (firstCard) firstCard.style.visibility = 'hidden';
+                if (secondCard) secondCard.style.visibility = 'hidden';
                 resetTurn();
             }, 1000);
         }
@@ -531,14 +539,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleMismatch = () => {
         const sfxDelay = difficulty === 'hard' ? 800 : 500;
-        setTimeout(() => { playSfx(sfx.fail); }, sfxDelay);
+        setTimeout(() => { playSfx('fail'); }, sfxDelay);
 
         if (difficulty === 'hard') {
             returnCardsBtn.classList.remove('hidden');
         } else {
             setTimeout(() => {
-                firstCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
-                secondCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
+                if(firstCard) firstCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
+                if(secondCard) secondCard.classList.remove('is-selected', 'ring-4', 'ring-offset-2', 'ring-[var(--c-cyan)]');
                 resetTurn();
             }, 1200);
         }
@@ -568,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const endGame = () => {
-        playSfx(sfx.clear);
+        playSfx('clear');
         setTimeout(() => {
             const modalContent = clearModal.querySelector('div');
             if (clearModal) clearModal.classList.remove('hidden');
@@ -582,16 +590,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ========== イベントリスナー設定 ==========
-    backToTitleBtn.addEventListener('click', () => { playSfx(sfx.button); init(); });
+    backToTitleBtn.addEventListener('click', () => { playSfx('button'); init(); });
     backToTitleFromClearBtn.addEventListener('click', () => {
-        playSfx(sfx.button);
+        playSfx('button');
         const modalContent = clearModal.querySelector('div');
         if (modalContent) modalContent.classList.add('scale-75', 'opacity-0');
         setTimeout(() => { if (clearModal) clearModal.classList.add('hidden'); init(); }, 300);
     });
 
     nextPairBtn.addEventListener('click', () => {
-        playSfx(sfx.button);
+        playSfx('button');
         if(firstCard && secondCard){
             firstCard.style.visibility = 'hidden';
             secondCard.style.visibility = 'hidden';
@@ -601,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     returnCardsBtn.addEventListener('click', () => {
-        playSfx(sfx.button);
+        playSfx('button');
         if(firstCard && secondCard){
             firstCard.classList.remove('is-flipped');
             secondCard.classList.remove('is-flipped');
@@ -611,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const adjustCardSize = (delta) => {
-        playSfx(sfx.button);
+        playSfx('button');
         const newSize = currentCardSize + delta;
         if (newSize >= 48 && newSize <= 256) {
             currentCardSize = newSize;
