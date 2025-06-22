@@ -16,33 +16,6 @@
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
         }
-        .demo-camera-view {
-            background: #4a5568;
-            position: relative;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-        .demo-scan-region {
-            width: 60%;
-            height: 60%;
-            border: 4px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
-            border-radius: 0.75rem;
-        }
-        .product-item {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .product-item:hover {
-            transform: translateY(-5px);
-        }
-        .quantity-btn {
-            width: 2rem;
-            height: 2rem;
-        }
     </style>
 </head>
 <body class="bg-stone-50 text-stone-800">
@@ -79,87 +52,7 @@
             </div>
         </section>
 
-        <!-- 3. Interactive Demo Section -->
-        <section id="demo" class="mb-20">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-2">使い方を体験する</h2>
-                <p class="text-md text-stone-600">下のアイテムをクリックするとカメラでスキャンしたかのようにカートに入ります。実際のシステムに近い操作を体験してみましょう。</p>
-            </div>
-            <div class="lg:flex lg:flex-row lg:gap-8">
-                <!-- Left Side: Camera and Products -->
-                <div class="w-full max-w-md mx-auto lg:w-5/12 lg:max-w-none lg:mx-0 mb-8 lg:mb-0">
-                    <div class="demo-camera-view mb-4">
-                        <div class="demo-scan-region"></div>
-                    </div>
-                    <p class="text-center font-bold mb-4">クリックして商品をスキャン</p>
-                    <div class="grid grid-cols-3 gap-4">
-                         <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="りんごジュース" data-price="120">
-                            <div class="text-4xl">🧃</div><div class="text-xs font-semibold">120円</div>
-                        </div>
-                        <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="おにぎり" data-price="150">
-                            <div class="text-4xl">🍙</div><div class="text-xs font-semibold">150円</div>
-                        </div>
-                        <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="ポテトチップス" data-price="180">
-                            <div class="text-4xl">🥔</div><div class="text-xs font-semibold">180円</div>
-                        </div>
-                        <div class="product-item cursor-pointer bg-white rounded-lg p-3 text-center shadow" data-name="チョコレート" data-price="100">
-                            <div class="text-4xl">🍫</div><div class="text-xs font-semibold">100円</div>
-                        </div>
-                        <div class="product-item cursor-pointer bg-teal-100 rounded-lg p-3 text-center shadow" data-payment="500">
-                            <div class="text-4xl">💳</div><div class="text-xs font-semibold">500円カード</div>
-                        </div>
-                        <div class="product-item cursor-pointer bg-teal-100 rounded-lg p-3 text-center shadow" data-payment="1000">
-                             <div class="text-4xl">💵</div><div class="text-xs font-semibold">1000円カード</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Side: Cart -->
-                <div class="lg:w-7/12">
-                    <div class="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col">
-                        <div class="flex items-center justify-between border-b pb-4 mb-4">
-                            <h2 class="text-2xl font-semibold">ショッピングカート</h2>
-                            <button id="clear-cart-button" class="text-sm font-medium text-red-500 hover:text-red-700">カートを空にする</button>
-                        </div>
-                        
-                        <div id="cart-items-container" class="divide-y divide-gray-200 flex-grow">
-                            <!-- Items will be injected here -->
-                        </div>
-                        <div id="payment-mode-message" class="hidden flex-grow flex flex-col items-center justify-center text-center">
-                            <p class="text-xl font-bold text-blue-600">お支払い用のカードを<br>クリックしてください</p>
-                        </div>
-
-                        <div class="mt-6 pt-6 border-t-2 border-dashed">
-                            <div class="flex justify-between items-center text-xl md:text-3xl font-bold mb-6">
-                                <span>合計金額:</span>
-                                <span id="total-price" class="text-green-600">¥0</span>
-                            </div>
-                            <div id="action-buttons">
-                                <button id="checkout-button" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg text-xl transition shadow disabled:bg-gray-400">お会計へ進む</button>
-                                <button id="back-to-scan-button" class="hidden w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg text-xl transition shadow">スキャンに戻る</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-             <!-- Receipt Modal -->
-            <div id="receipt-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-                <div class="bg-white p-8 rounded-lg text-center shadow-2xl max-w-sm mx-auto">
-                    <div id="receipt-success">
-                        <h2 class="text-2xl font-bold text-gray-800">お支払い完了</h2>
-                        <p class="text-gray-600 mt-2 mb-4">ありがとうございました。</p>
-                        <p id="receipt-change" class="text-lg font-semibold"></p>
-                    </div>
-                    <div id="receipt-failure" class="hidden">
-                        <h2 class="text-2xl font-bold text-red-600">支払い失敗</h2>
-                        <p id="receipt-shortage" class="text-gray-600 mt-2 mb-4"></p>
-                    </div>
-                    <button id="new-transaction-button" class="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition">閉じる</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. Screen and Buttons Explanation Section -->
+        <!-- 3. Screen and Buttons Explanation Section -->
         <section id="explanation" class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-2">画面とボタンの説明</h2>
@@ -209,7 +102,7 @@
             </div>
         </section>
 
-        <!-- 5. How to Create Section -->
+        <!-- 4. How to Create Section -->
         <section id="create" class="mb-20">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-2">教材の作り方</h2>
@@ -221,7 +114,7 @@
                         <h3 class="text-2xl font-bold mb-4">Step 1: 専用サイトでコードを作成</h3>
                         <p class="mb-4 text-stone-600">専用の二次元コード作成サイトを開き、教材で使う商品や支払い用のコードを作ります。</p>
                         <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-center mb-6">
-                            <p class="font-bold text-teal-800 mb-2">二次元コード生成</p>
+                            <p class="font-bold text-teal-800 mb-2">二次元コード生成サイト</p>
                             <a href="https://y-sensei-lab.github.io/pos-system/qr_generator.html" target="_blank" class="text-teal-600 hover:underline break-all">https://y-sensei-lab.github.io/pos-system/qr_generator.html</a>
                         </div>
                         <ol class="list-decimal list-inside space-y-2 text-stone-600">
@@ -234,9 +127,38 @@
                         <h3 class="text-2xl font-bold mb-4">Step 2: レジシステムを起動する</h3>
                         <p class="mb-4 text-stone-600">準備した二次元コードを使って、レジシステムで買い物学習を始めます。インストールは不要です。</p>
                         <div class="bg-teal-50 border border-teal-200 p-4 rounded-lg text-center">
-                            <p class="font-bold text-teal-800 mb-2">レジシステム</p>
+                            <p class="font-bold text-teal-800 mb-2">レジシステム公開場所</p>
                             <a href="https://y-sensei-lab.github.io/pos-system/" target="_blank" class="text-teal-600 hover:underline break-all">https://y-sensei-lab.github.io/pos-system/</a>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 5. Other Materials Section -->
+        <section id="other-materials" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2">その他の教材紹介</h2>
+            </div>
+            <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-8 border border-stone-200">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🧠</div>
+                        <h3 class="text-2xl font-bold mb-2">デジタル神経衰弱</h3>
+                        <p class="text-stone-600 mb-6">短期記憶や集中力のトレーニングに活用できる、シンプルな神経衰弱ゲームです。</p>
+                        <a href="https://y-sensei-lab.github.io/memory-game/" target="_blank" class="inline-block bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg transition">
+                            遊んでみる
+                        </a>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-8 border border-stone-200">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">🏆</div>
+                        <h3 class="text-2xl font-bold mb-2">チームスコアトラッカー</h3>
+                        <p class="text-stone-600 mb-6">2チーム対戦で使える得点掲示板です。授業での活動やレクリエーションにどうぞ。</p>
+                        <a href="https://y-sensei-lab.github.io/scoreboard/" target="_blank" class="inline-block bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg transition">
+                            使ってみる
+                        </a>
                     </div>
                 </div>
             </div>
@@ -278,157 +200,5 @@
         <p>&copy; 久我山青光学園 教材展2025</p>
     </footer>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const cartItemsContainer = document.getElementById('cart-items-container');
-        const totalPriceEl = document.getElementById('total-price');
-        const clearCartButton = document.getElementById('clear-cart-button');
-        const checkoutButton = document.getElementById('checkout-button');
-        const backToScanButton = document.getElementById('back-to-scan-button');
-        const paymentModeMessage = document.getElementById('payment-mode-message');
-        
-        const receiptModal = document.getElementById('receipt-modal');
-        const newTransactionButton = document.getElementById('new-transaction-button');
-        const receiptSuccess = document.getElementById('receipt-success');
-        const receiptFailure = document.getElementById('receipt-failure');
-        const receiptChange = document.getElementById('receipt-change');
-        const receiptShortage = document.getElementById('receipt-shortage');
-
-        let cart = []; // Stores {name, price, quantity}
-        let isPaymentMode = false;
-
-        function renderCart() {
-            cartItemsContainer.innerHTML = '';
-            let currentTotal = 0;
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-gray-500 py-4 text-center">カートは空です。</p>';
-            } else {
-                cart.forEach(item => {
-                    currentTotal += item.price * item.quantity;
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'flex justify-between items-center py-3';
-                    itemElement.innerHTML = `
-                        <div class="flex-grow pr-2">
-                            <p class="font-semibold">${item.name}</p>
-                            <p class="text-sm text-gray-500">¥${item.price.toLocaleString()}</p>
-                        </div>
-                        <div class="flex items-center">
-                            <button data-name="${item.name}" class="quantity-minus quantity-btn flex items-center justify-center bg-gray-200 text-lg font-bold rounded-full hover:bg-gray-300">-</button>
-                            <span class="w-10 text-center text-lg font-semibold">${item.quantity}</span>
-                            <button data-name="${item.name}" class="quantity-plus quantity-btn flex items-center justify-center bg-gray-200 text-lg font-bold rounded-full hover:bg-gray-300">+</button>
-                        </div>
-                        <div class="w-24 text-right font-semibold">¥${(item.price * item.quantity).toLocaleString()}</div>
-                        <div class="w-16 text-right">
-                            <button data-name="${item.name}" class="remove-item-btn text-red-500 hover:text-red-700 p-1">削除</button>
-                        </div>`;
-                    cartItemsContainer.appendChild(itemElement);
-                });
-            }
-            totalPriceEl.textContent = `¥${currentTotal.toLocaleString()}`;
-            checkoutButton.disabled = cart.length === 0;
-        }
-
-        function addItem(name, price) {
-            if (isPaymentMode) return;
-            const existingItem = cart.find(item => item.name === name);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                cart.push({ name, price, quantity: 1 });
-            }
-            renderCart();
-        }
-
-        function changeQuantity(name, delta) {
-            const item = cart.find(i => i.name === name);
-            if (item) {
-                item.quantity += delta;
-                if (item.quantity <= 0) {
-                    cart = cart.filter(i => i.name !== name);
-                }
-            }
-            renderCart();
-        }
-        
-        function handlePayment(paymentAmount) {
-            if (!isPaymentMode) return;
-            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const change = paymentAmount - total;
-
-            if (change >= 0) {
-                receiptSuccess.classList.remove('hidden');
-                receiptFailure.classList.add('hidden');
-                receiptChange.textContent = `おつりは ¥${change.toLocaleString()} です。`;
-            } else {
-                receiptSuccess.classList.add('hidden');
-                receiptFailure.classList.remove('hidden');
-                receiptShortage.textContent = `¥${-change.toLocaleString()} 不足しています。`;
-            }
-            receiptModal.classList.remove('hidden');
-        }
-
-        function resetDemo() {
-            cart = [];
-            isPaymentMode = false;
-            receiptModal.classList.add('hidden');
-            paymentModeMessage.classList.add('hidden');
-            cartItemsContainer.classList.remove('hidden');
-            checkoutButton.classList.remove('hidden');
-            backToScanButton.classList.add('hidden');
-            renderCart();
-        }
-
-        document.querySelectorAll('.product-item').forEach(item => {
-            item.addEventListener('click', () => {
-                if (item.dataset.name) {
-                    addItem(item.dataset.name, parseInt(item.dataset.price));
-                } else if (item.dataset.payment) {
-                    handlePayment(parseInt(item.dataset.payment));
-                }
-            });
-        });
-
-        cartItemsContainer.addEventListener('click', (e) => {
-            if (isPaymentMode) return;
-            const target = e.target;
-            const name = target.dataset.name || target.closest('[data-name]')?.dataset.name;
-            if (!name) return;
-
-            if (target.classList.contains('quantity-plus')) changeQuantity(name, 1);
-            if (target.classList.contains('quantity-minus')) changeQuantity(name, -1);
-            if (target.classList.contains('remove-item-btn')) changeQuantity(name, -Infinity); // Remove all
-        });
-        
-        clearCartButton.addEventListener('click', () => {
-             if (!isPaymentMode) {
-                cart = [];
-                renderCart();
-             }
-        });
-
-        checkoutButton.addEventListener('click', () => {
-            if (cart.length > 0) {
-                isPaymentMode = true;
-                cartItemsContainer.classList.add('hidden');
-                paymentModeMessage.classList.remove('hidden');
-                checkoutButton.classList.add('hidden');
-                backToScanButton.classList.add('hidden');
-            }
-        });
-
-        backToScanButton.addEventListener('click', () => {
-            isPaymentMode = false;
-            cartItemsContainer.classList.remove('hidden');
-            paymentModeMessage.classList.add('hidden');
-            checkoutButton.classList.remove('hidden');
-            backToScanButton.classList.add('hidden');
-        });
-        
-        newTransactionButton.addEventListener('click', resetDemo);
-
-        resetDemo();
-    });
-    </script>
 </body>
 </html>
