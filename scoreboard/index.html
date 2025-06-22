@@ -28,8 +28,8 @@
         /* 紙吹雪のスタイル */
         .confetti {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background-color: #f00;
             opacity: 0.7;
             border-radius: 50%;
@@ -47,65 +47,67 @@
         }
     </style>
 </head>
-<!-- モバイルとPCの両方で上下に十分な余白を追加 -->
-<body class="bg-gray-100 h-screen flex flex-col items-center justify-center px-2 pt-8 pb-4 sm:px-4 sm:pt-8 sm:pb-4">
+<!-- justify-startで上部詰めのレイアウトに変更 -->
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-4">
 
-    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-4 flex-shrink-0" style="font-family: 'Mochiy Pop One', sans-serif;">スコアトラッカー</h1>
+    <div class="w-full max-w-4xl flex flex-col">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-800 mb-1 md:mb-2 flex-shrink-0 text-center" style="font-family: 'Mochiy Pop One', sans-serif;">スコアトラッカー</h1>
 
-    <!-- 優勢バー -->
-    <div class="w-full max-w-6xl mb-2 md:mb-4 flex-shrink-0">
-        <div class="flex h-6 rounded-full overflow-hidden bg-gray-300 shadow-inner">
-            <div id="progress-bar-0" class="bg-blue-500 transition-all duration-500 ease-in-out" style="width: 50%;"></div>
-            <div id="progress-bar-1" class="bg-red-500 transition-all duration-500 ease-in-out" style="width: 50%;"></div>
+        <!-- 優勢バー -->
+        <div class="w-full mb-1 md:mb-2 flex-shrink-0">
+            <div class="flex h-4 rounded-full overflow-hidden bg-gray-300 shadow-inner">
+                <div id="progress-bar-0" class="bg-blue-500 transition-all duration-500 ease-in-out" style="width: 50%;"></div>
+                <div id="progress-bar-1" class="bg-red-500 transition-all duration-500 ease-in-out" style="width: 50%;"></div>
+            </div>
         </div>
-    </div>
 
-    <!-- チーム表示エリア -->
-    <div id="teams-wrapper" class="w-full max-w-6xl flex-grow flex rounded-2xl overflow-hidden shadow-2xl bg-gray-200 min-h-0">
-        <!-- チーム1 -->
-        <div id="team-0-container" class="w-1/2 bg-blue-500 p-2 md:p-4 flex flex-col items-center">
-            <input type="text" id="team-0-name" value="あおチーム" class="text-2xl md:text-3xl font-bold text-white bg-transparent text-center rounded-lg p-2 mb-1 md:mb-2 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
-            <div class="text-6xl md:text-8xl font-bold text-white mb-2 md:mb-4 flex-shrink-0" id="team-0-total-score">0</div>
-            <div id="team-0-members" class="w-full flex-grow overflow-y-auto pr-2"></div>
-            <div class="mt-auto pt-2 md:pt-4 w-full flex-shrink-0">
-                <div class="flex gap-2">
-                    <input type="text" id="member-name-0" class="w-full px-3 py-2 rounded-lg border-2 border-blue-200 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base" placeholder="メンバーの名前">
-                    <button id="add-button-0" onclick="addMember(0)" class="bg-white text-blue-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-blue-50 transition-transform transform hover:scale-105">追加</button>
+        <!-- チーム表示エリア (高さを固定) -->
+        <div id="teams-wrapper" class="w-full flex rounded-xl overflow-hidden shadow-xl bg-gray-200" style="height: 60vh; max-height: 500px;">
+            <!-- チーム1 -->
+            <div id="team-0-container" class="w-1/2 bg-blue-500 p-1 md:p-2 flex flex-col items-center">
+                <input type="text" id="team-0-name" value="あおチーム" class="text-lg md:text-xl font-bold text-white bg-transparent text-center rounded-lg p-1 mb-1 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
+                <div class="text-4xl md:text-6xl font-bold text-white mb-1 md:mb-2 flex-shrink-0" id="team-0-total-score">0</div>
+                <div id="team-0-members" class="w-full flex-grow overflow-y-auto pr-1 min-h-0"></div>
+                <div class="mt-auto pt-1 md:pt-2 w-full flex-shrink-0">
+                    <div class="flex gap-1">
+                        <input type="text" id="member-name-0" class="w-full px-2 py-1 rounded-md border-2 border-blue-200 focus:outline-none focus:ring-2 focus:ring-white text-xs sm:text-sm" placeholder="メンバーの名前">
+                        <button id="add-button-0" onclick="addMember(0)" class="bg-white text-blue-500 font-bold py-1 px-2 sm:px-3 rounded-md shadow-md hover:bg-blue-50 transition-transform transform hover:scale-105 text-sm">追加</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- チーム2 -->
+            <div id="team-1-container" class="w-1/2 bg-red-500 p-1 md:p-2 flex flex-col items-center">
+                <input type="text" id="team-1-name" value="あかチーム" class="text-lg md:text-xl font-bold text-white bg-transparent text-center rounded-lg p-1 mb-1 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
+                <div class="text-4xl md:text-6xl font-bold text-white mb-1 md:mb-2 flex-shrink-0" id="team-1-total-score">0</div>
+                <div id="team-1-members" class="w-full flex-grow overflow-y-auto pr-1 min-h-0"></div>
+                <div class="mt-auto pt-1 md:pt-2 w-full flex-shrink-0">
+                    <div class="flex gap-1">
+                        <input type="text" id="member-name-1" class="w-full px-2 py-1 rounded-md border-2 border-red-200 focus:outline-none focus:ring-2 focus:ring-white text-xs sm:text-sm" placeholder="メンバーの名前">
+                        <button id="add-button-1" onclick="addMember(1)" class="bg-white text-red-500 font-bold py-1 px-2 sm:px-3 rounded-md shadow-md hover:bg-red-50 transition-transform transform hover:scale-105 text-sm">追加</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- チーム2 -->
-        <div id="team-1-container" class="w-1/2 bg-red-500 p-2 md:p-4 flex flex-col items-center">
-            <input type="text" id="team-1-name" value="あかチーム" class="text-2xl md:text-3xl font-bold text-white bg-transparent text-center rounded-lg p-2 mb-1 md:mb-2 w-full focus:outline-none focus:ring-2 focus:ring-white flex-shrink-0" placeholder="チーム名を入力">
-            <div class="text-6xl md:text-8xl font-bold text-white mb-2 md:mb-4 flex-shrink-0" id="team-1-total-score">0</div>
-            <div id="team-1-members" class="w-full flex-grow overflow-y-auto pr-2"></div>
-            <div class="mt-auto pt-2 md:pt-4 w-full flex-shrink-0">
-                <div class="flex gap-2">
-                    <input type="text" id="member-name-1" class="w-full px-3 py-2 rounded-lg border-2 border-red-200 focus:outline-none focus:ring-2 focus:ring-white text-sm sm:text-base" placeholder="メンバーの名前">
-                    <button id="add-button-1" onclick="addMember(1)" class="bg-white text-red-500 font-bold py-2 px-3 sm:px-4 rounded-lg shadow-md hover:bg-red-50 transition-transform transform hover:scale-105">追加</button>
-                </div>
-            </div>
+        <!-- 操作ボタンエリア -->
+        <div class="flex gap-3 mt-2 sm:mt-3 flex-shrink-0 self-center">
+            <button onclick="resetScores()" class="bg-yellow-500 text-white font-bold py-1 px-4 text-sm sm:py-2 sm:px-6 sm:text-base rounded-full shadow-lg hover:bg-yellow-600 transition-transform transform hover:scale-105">
+                リセット
+            </button>
+            <button onclick="endGame()" class="bg-green-500 text-white font-bold py-1 px-4 text-sm sm:py-2 sm:px-6 sm:text-base rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
+                ゲーム終了
+            </button>
         </div>
-    </div>
-
-    <!-- 操作ボタンエリア -->
-    <div class="flex gap-4 mt-4 sm:mt-6 flex-shrink-0">
-        <button onclick="resetScores()" class="bg-yellow-500 text-white font-bold py-2 px-4 text-base sm:py-3 sm:px-8 sm:text-lg rounded-full shadow-lg hover:bg-yellow-600 transition-transform transform hover:scale-105">
-            点数リセット
-        </button>
-        <button onclick="endGame()" class="bg-green-500 text-white font-bold py-2 px-4 text-base sm:py-3 sm:px-8 sm:text-lg rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105">
-            ゲーム終了！
-        </button>
     </div>
 
     <!-- 結果発表モーダル -->
     <div id="result-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-        <div id="result-box" class="bg-white p-6 sm:p-10 rounded-3xl shadow-2xl text-center transform scale-0 transition-transform duration-500 ease-in-out">
-            <h2 id="result-title" class="text-3xl sm:text-5xl font-bold mb-4" style="font-family: 'Mochiy Pop One', sans-serif;"></h2>
-            <p id="result-message" class="text-xl sm:text-2xl text-gray-700"></p>
-            <p id="result-score" class="text-5xl sm:text-7xl font-bold my-6"></p>
-            <button onclick="closeModal()" class="mt-6 bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 text-lg">
+        <div id="result-box" class="bg-white p-4 sm:p-8 rounded-2xl shadow-2xl text-center transform scale-0 transition-transform duration-500 ease-in-out">
+            <h2 id="result-title" class="text-xl sm:text-3xl font-bold mb-2" style="font-family: 'Mochiy Pop One', sans-serif;"></h2>
+            <p id="result-message" class="text-base sm:text-xl text-gray-700"></p>
+            <p id="result-score" class="text-3xl sm:text-5xl font-bold my-4"></p>
+            <button onclick="closeModal()" class="mt-4 bg-green-500 text-white font-bold py-2 px-6 rounded-full shadow-lg hover:bg-green-600 transition-transform transform hover:scale-105 text-base">
                 もう一回！
             </button>
         </div>
@@ -164,7 +166,7 @@
 
                 // 表示領域の高さと行の高さから、表示可能な行数を計算
                 const availableHeight = membersContainer.offsetHeight;
-                const rowHeight = window.innerWidth < 640 ? 46 : 50; // モバイルとPCで行の高さを調整
+                const rowHeight = window.innerWidth < 640 ? 30 : 38; // モバイルとPCで行の高さを調整
                 const maxInCol = Math.max(1, Math.floor(availableHeight / rowHeight));
                 const maxTotal = maxInCol * 2;
 
@@ -193,10 +195,10 @@
 
                 team.members.forEach((member, memberIndex) => {
                     const memberDiv = document.createElement('div');
-                    memberDiv.className = 'flex items-center justify-between bg-white bg-opacity-30 rounded-lg p-1 md:p-2 shadow';
+                    memberDiv.className = 'flex items-center justify-between bg-white bg-opacity-30 rounded-md p-1 shadow';
                     
                     const memberName = document.createElement('span');
-                    const nameFontSize = team.members.length > maxInCol ? 'text-sm sm:text-base' : 'text-base sm:text-lg';
+                    const nameFontSize = team.members.length > maxInCol ? 'text-xs sm:text-sm' : 'text-sm sm:text-base';
                     memberName.className = `text-white font-semibold flex-grow ${nameFontSize} truncate`;
                     memberName.textContent = member.name;
                     
@@ -205,12 +207,12 @@
 
                     const minusButton = document.createElement('button');
                     minusButton.textContent = '－';
-                    minusButton.className = 'w-5 h-5 sm:w-6 sm:h-6 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
+                    minusButton.className = 'w-4 h-4 sm:w-5 sm:h-5 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
                     minusButton.onclick = () => changeScore(teamIndex, memberIndex, -1);
 
                     const scoreInput = document.createElement('input');
                     scoreInput.type = 'number';
-                    scoreInput.className = 'score-input w-10 text-base sm:w-12 sm:text-lg font-bold bg-white rounded-md p-1 shadow-inner text-center';
+                    scoreInput.className = 'score-input w-8 text-sm sm:w-10 sm:text-base font-bold bg-white rounded-md p-0.5 shadow-inner text-center';
                     scoreInput.value = member.score;
                     scoreInput.min = "0";
                     scoreInput.addEventListener('input', (e) => {
@@ -222,12 +224,12 @@
 
                     const plusButton = document.createElement('button');
                     plusButton.textContent = '＋';
-                    plusButton.className = 'w-5 h-5 sm:w-6 sm:h-6 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
+                    plusButton.className = 'w-4 h-4 sm:w-5 sm:h-5 bg-white text-gray-700 font-bold rounded-full shadow hover:bg-gray-100 flex items-center justify-center transition-transform transform hover:scale-110';
                     plusButton.onclick = () => changeScore(teamIndex, memberIndex, 1);
 
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = '✕';
-                    deleteButton.className = 'mr-2 text-white font-bold hover:text-red-200 text-lg sm:text-xl';
+                    deleteButton.className = 'mr-1 text-white font-bold hover:text-red-200 text-base sm:text-lg';
                     deleteButton.onclick = () => deleteMember(teamIndex, memberIndex);
 
                     scoreControls.appendChild(minusButton);
@@ -365,13 +367,13 @@
 
         function launchConfetti() {
             const colors = ['#ef4444', '#3b82f6', '#fbbf24', '#34d399', '#a78bfa'];
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 50; i++) { // 紙吹雪の量を調整
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = `${Math.random() * 100}vw`;
                 confetti.style.animationDelay = `${Math.random() * 2}s`;
                 confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.transform = `scale(${Math.random() * 0.8 + 0.5})`;
+                confetti.style.transform = `scale(${Math.random() * 0.7 + 0.4})`;
                 document.body.appendChild(confetti);
                 setTimeout(() => {
                     confetti.remove();
