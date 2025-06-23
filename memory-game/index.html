@@ -55,15 +55,13 @@
 </head>
 <body class="bg-[var(--c-bg)] text-[var(--c-black)]">
 
-    <!-- ========== タイトル画面 ========== -->
     <div id="title-screen" class="w-full max-w-2xl mx-auto pt-8 pb-24 px-4 sm:px-8 text-center">
         <h1 class="text-4xl md:text-6xl text-[var(--c-dark-blue)] mb-8 drop-shadow-md">デジタル神経衰弱</h1>
 
-        <!-- ステップ1: 画像選択 -->
         <div id="step1-container">
             <div id="image-selection-section" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">1. 画像を選ぶ</h2>
-                <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>同じ画像が2枚で1ペアになります。</p>
+                <p class="text-sm text-gray-500 mb-4">使う画像を選択してください。<br>画像が複製されて2枚1ペアになります。</p>
                 <div class="grid md:grid-cols-2 gap-4">
                     <label for="folder-input" class="w-full bg-[var(--c-cyan)] hover:brightness-95 text-white font-bold p-2 rounded-xl shadow-md cursor-pointer transition-transform transform hover:scale-105 h-20 flex flex-col justify-center items-center">
                         <span>フォルダでまとめて選択</span>
@@ -79,17 +77,15 @@
                  <p id="image-info" class="text-gray-600 hidden mt-4"></p>
             </div>
             <div class="grid grid-cols-2 gap-4 mt-4">
-                <div></div> <!-- 左側の空のセル -->
-                <button id="confirm-images-btn" class="w-full bg-[var(--c-gray)] text-white font-bold p-3 rounded-xl shadow-md cursor-not-allowed transition-transform transform hover:scale-105" disabled>決定</button>
+                <div></div> <button id="confirm-images-btn" class="w-full bg-[var(--c-gray)] text-white font-bold p-3 rounded-xl shadow-md cursor-not-allowed transition-transform transform hover:scale-105" disabled>決定</button>
             </div>
         </div>
         
-        <!-- ステップ2: 表示方法選択 -->
         <div id="step2-container" class="hidden">
             <div id="image-fit-selection" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">2. 画像の表示方法を選ぶ</h2>
                 <p class="text-sm text-gray-500 mb-4">
-                    トリミング: カードに合わせて拡大・縮小<br>
+                    トリミング: カードに合わせて切り取る<br>
                     全体表示: 画像全体をカードに収める
                 </p>
                 <div class="flex justify-center gap-4">
@@ -107,7 +103,6 @@
             </div>
         </div>
 
-        <!-- ステップ3: 難易度選択 -->
         <div id="step3-container" class="hidden">
             <div id="difficulty-selection" class="bg-white p-6 rounded-2xl shadow-lg border-2 border-[var(--c-dark-blue)]">
                 <h2 class="text-xl font-bold mb-4 text-[var(--c-dark-blue)]">3. 難易度を選ぶ</h2>
@@ -131,7 +126,6 @@
         </div>
     </div>
 
-    <!-- ========== ゲーム画面 ========== -->
     <div id="game-screen" class="hidden w-full h-screen flex flex-col p-4">
         <div class="flex justify-between items-start mb-2">
             <button id="back-to-title-btn" class="bg-[var(--c-dark-blue)] hover:brightness-95 text-white font-bold py-2 px-4 rounded-full shadow-md transition-transform transform hover:scale-105">
@@ -469,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="font-pop text-4xl text-white drop-shadow-md">?</span>
                 </div>
                 <div class="card-face card-back absolute w-full h-full rounded-xl bg-white p-1 flex items-center justify-center">
-                    <img src="${imageSrc}" class="max-w-full max-h-full rounded-lg" style="object-fit: ${imageFit};" draggable="false">
+                    <img src="${imageSrc}" class="w-full h-full rounded-lg" style="object-fit: ${imageFit};" draggable="false">
                 </div>
             `;
             if (difficulty === 'easy') card.classList.add('is-flipped');
