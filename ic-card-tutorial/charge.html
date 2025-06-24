@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICカード チャージ</title>
+    <style>
+        /* ページ全体のスタイル */
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+            background-color: #f0f8ff; /* 明るい水色 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* コンテンツを入れる箱のスタイル */
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        /* 見出しのスタイル */
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+
+        /* 金額入力エリアのスタイル */
+        .charge-area {
+            margin-bottom: 30px;
+        }
+
+        /* ラベルのスタイル */
+        label {
+            display: block;
+            font-size: 1.8em;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        /* 数字入力欄のスタイル */
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 2em;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box; /* paddingを含めて幅を計算 */
+        }
+        /* スピナー（上下矢印）を非表示にする */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+
+        /* ボタンのスタイル */
+        button {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            background-color: #4CAF50; /* 緑色 */
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        /* ボタンを押したときの見た目 */
+        button:active {
+            background-color: #45a049;
+            transform: scale(0.98);
+        }
+
+        /* メッセージ表示エリアのスタイル */
+        #messageArea {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            min-height: 50px; /* 高さを確保してレイアウトが崩れないようにする */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .success {
+            color: #2e7d32; /* 濃い緑 */
+        }
+        .error {
+            color: #d32f2f; /* 濃い赤 */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ICカードに チャージする</h1>
+        
+        <div class="charge-area">
+            <label for="amount">チャージする きんがく（えん）</label>
+            <input type="number" id="amount" placeholder="1000" inputmode="numeric">
+        </div>
+
+        <button id="chargeButton">このきんがくを カードに いれる</button>
+
+        <p id="messageArea"></p>
+    </div>
+
+    <script>
+        // DOM要素の取得
+        const chargeButton = document.getElementById('chargeButton');
+        const amountInput = document.getElementById('amount');
+        const messageArea = document.getElementById('messageArea');
+
+        // ボタンがクリックされたときの処理
+        chargeButton.addEventListener('click', async () => {
+            // メッセージを初期化
+            messageArea.textContent = '';
+            messageArea.className = '';
+
+            // Web NFCが使えるかチェック
+            if (!('NDEFReader' in window)) {
+                messageArea.textContent = 'このブラウザは NFCに たいおうしていません。';
+                messageArea.className = 'error';
+                return;
+            }
+
+            // 入力された金額を取得
+            const amount = parseInt(amountInput.value, 10);
+
+            // 金額が正しいかチェック
+            if (isNaN(amount) || amount <= 0) {
+                messageArea.textContent = 'ただしい きんがくを いれてください。';
+                messageArea.className = 'error';
+                return;
+            }
+
+            try {
+                // NFCの書き込み準備
+                const ndef = new NDEFReader();
+                
+                // メッセージを表示して、ユーザーにカードをタッチするよう促す
+                messageArea.textContent = 'スマホの うしろに カードを あててください...';
+                
+                // NFCタグにデータを書き込む
+                // データ形式: { "balance": (入力された金額) } というJSONテキスト
+                await ndef.write({
+                    records: [{ 
+                        recordType: "text", 
+                        data: JSON.stringify({ balance: amount }) 
+                    }]
+                });
+
+                // 成功メッセージを表示
+                messageArea.textContent = `${amount}えんの チャージが かんりょうしました！`;
+                messageArea.className = 'success';
+
+            } catch (error) {
+                // エラーが発生した場合の処理
+                console.error("NFC書き込みエラー:", error);
+                messageArea.textContent = 'エラーが おきました。もういちど やってみてください。';
+                messageArea.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>

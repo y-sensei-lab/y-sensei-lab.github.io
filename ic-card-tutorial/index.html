@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>改札 シミュレーション</title>
+    <style>
+        /* ページ全体のスタイル */
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+            margin: 0;
+            overflow: hidden; /* スクロールバーを消す */
+        }
+
+        /* 背景画像とコンテンツのコンテナ */
+        .gate-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('https://y-sensei-lab.github.io/ic-card-tutorial/images/gate.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        /* 情報表示エリア */
+        .info-panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* 運賃表示のスタイル */
+        .fare-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        /* メッセージ表示エリアのスタイル */
+        #messageArea {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        /* 成功/失敗メッセージの色 */
+        .success-text {
+            color: #a5d6a7; /* 明るい緑 */
+        }
+        .error-text {
+            color: #ef9a9a; /* 明るい赤 */
+        }
+
+        /* 成功時の光るエフェクト用オーバーレイ */
+        #flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: yellow;
+            opacity: 0;
+            pointer-events: none; /* クリックなどを透過させる */
+        }
+
+        /* アニメーションの定義 */
+        @keyframes flash-success {
+            0% { opacity: 0.7; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes shake-error {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        
+        /* アニメーションを適用するためのクラス */
+        .flash {
+            animation: flash-success 0.5s ease-out;
+        }
+        .shake {
+            animation: shake-error 0.5s ease-in-out;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="gate-container" id="gateContainer">
+        <div class="info-panel">
+            <p class="fare-display"><ruby>運賃<rt>うんちん</rt></ruby>は 150<ruby>円<rt>えん</rt></ruby>です</p>
+            <p id="messageArea">ここに カードを タッチしてください</p>
+        </div>
+    </div>
+    
+    <!-- 光るエフェクト用の要素 -->
+    <div id="flash-overlay"></div>
+
+    <script>
+        // DOM要素と設定
+        const messageArea = document.getElementById('messageArea');
+        const flashOverlay = document.getElementById('flash-overlay');
+        const gateContainer = document.getElementById('gateContainer');
+        const fare = 150; // 運賃
+
+        // 音声ファイルの準備
+        const successSound = new Audio('https://y-sensei-lab.github.io/ic-card-tutorial/audio/success-sound.mp3');
+        const errorSound = new Audio('https://y-sensei-lab.github.io/ic-card-tutorial/audio/error-sound.mp3');
+
+        // ページが読み込まれたらNFCスキャンを開始
+        window.addEventListener('load', startScan);
+
+        async function startScan() {
+            // Web NFCが使えるかチェック
+            if (!('NDEFReader' in window)) {
+                messageArea.textContent = 'このブラウザは NFCに たいおうしていません。';
+                return;
+            }
+
+            try {
+                const reader = new NDEFReader();
+                // スキャンを開始
+                await reader.scan();
+                
+                messageArea.textContent = 'スキャンちゅう... カードをどうぞ';
+                
+                // データ読み取り時のイベントハンドラ
+                reader.onreading = async (event) => {
+                    // 以前のアニメーションクラスを削除
+                    gateContainer.classList.remove('shake');
+                    flashOverlay.classList.remove('flash');
+
+                    try {
+                        // 最初のレコードからデータを取得
+                        const record = event.message.records[0];
+                        if (record.recordType !== 'text') {
+                            throw new Error('テキストデータではありません。');
+                        }
+
+                        // テキストデータをデコードしてJSONに変換
+                        const textDecoder = new TextDecoder(record.encoding);
+                        const jsonText = textDecoder.decode(record.data);
+                        const data = JSON.parse(jsonText);
+
+                        // 残高(balance)があるかチェック
+                        if (typeof data.balance !== 'number') {
+                            throw new Error('残高情報がありません。');
+                        }
+
+                        const balance = data.balance;
+
+                        // 残高が運賃以上か判定
+                        if (balance >= fare) {
+                            // --- 残高が足りる場合 ---
+                            successSound.play();
+                            flashOverlay.classList.add('flash'); // 光るエフェクト
+
+                            const newBalance = balance - fare;
+
+                            // 新しい残高をNFCタグに上書きする
+                            const writer = new NDEFReader();
+                            await writer.write({
+                                records: [{ 
+                                    recordType: "text", 
+                                    data: JSON.stringify({ balance: newBalance }) 
+                                }]
+                            });
+
+                            // メッセージを更新
+                            messageArea.textContent = `どうぞ！ のこりは ${newBalance}えん です。`;
+                            messageArea.className = 'success-text';
+
+                        } else {
+                            // --- 残高が足りない場合 ---
+                            errorSound.play();
+                            gateContainer.classList.add('shake'); // 揺れるエフェクト
+
+                            messageArea.textContent = 'きんがくが たりません。チャージしてください。';
+                            messageArea.className = 'error-text';
+                        }
+
+                    } catch (err) {
+                        // データ形式が違うなどのエラー
+                        console.error('読み取り処理エラー:', err);
+                        errorSound.play();
+                        gateContainer.classList.add('shake');
+                        messageArea.textContent = 'カードの よみとりが しっぱいしました。';
+                        messageArea.className = 'error-text';
+                    } finally {
+                        // アニメーションが終わったらクラスを削除して、次のアニメーションに備える
+                        setTimeout(() => {
+                           flashOverlay.classList.remove('flash');
+                           gateContainer.classList.remove('shake');
+                        }, 500);
+                    }
+                };
+
+            } catch (error) {
+                // スキャン開始自体のエラー
+                console.error('NFCスキャン開始エラー:', error);
+                messageArea.textContent = 'NFCの じゅんびが できませんでした。';
+                messageArea.className = 'error-text';
+            }
+        }
+    </script>
+</body>
+</html>
