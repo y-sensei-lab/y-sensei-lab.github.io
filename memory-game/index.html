@@ -473,7 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const onCardClick = (card) => {
-        if (lockBoard || card === firstCard || card.classList.contains('is-matched')) return;
+        // [修正] クリックしたカードが1枚目と同じだった場合に操作を中断する処理を削除し、
+        // 選択解除のロジックが正しく動作するようにしました。
+        if (lockBoard || card.classList.contains('is-matched')) return;
+
         if (difficulty === 'hard') {
             if (card.classList.contains('is-flipped')) {
                 card.classList.remove('is-flipped');
