@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>よこはまコスモワールド アトラクションシミュレーター</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background-color: #f0f9ff; /* 明るい水色 */
+            position: relative;
+        }
+        /* 背景アイコンのラッパー */
+        #background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0; /* コンテンツの背面に表示 */
+        }
+        /* 背景に浮かぶアイコンのスタイル */
+        .bg-icon {
+            position: absolute;
+            display: block;
+            animation: float 25s linear infinite;
+            bottom: -150px; /* 画面下からスタート */
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .bg-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        rt { font-size: 0.7em; }
+        .attraction-btn {
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        .attraction-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+            transition: background-color 0.3s ease;
+        }
+        .attraction-btn:hover::before { background-color: rgba(0, 0, 0, 0.2); }
+        .attraction-btn > * { position: relative; z-index: 1; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="background-wrapper"></div>
+
+    <!-- 画像生成用の非表示エリア -->
+    <div id="image-output-area" class="fixed top-0 left-[-9999px] bg-sky-100 p-8 w-[800px] text-gray-800">
+        <div class="text-center border-b-2 border-blue-300 pb-4 mb-6">
+            <h2 class="text-4xl font-extrabold text-blue-700">わたしの<ruby>修<rt>しゅう</rt>学<rt>がく</rt>旅<rt>りょ</rt>行<rt>こう</rt></ruby>プラン</h2>
+            <p class="text-lg text-blue-600">in よこはまコスモワールド</p>
+        </div>
+        <div id="image-output-grid" class="grid grid-cols-3 gap-4 mb-6">
+            <!-- 画像保存用のアトラクションカードはJSでここに追加されます -->
+        </div>
+        <div class="bg-white/70 rounded-xl p-4 text-right">
+            <p class="text-xl"><ruby>使<rt>つか</rt></ruby>った<ruby>合<rt>ごう</rt>計<rt>けい</rt></ruby>: <span id="image-output-used" class="font-bold text-3xl text-red-600">0<ruby>円<rt>えん</rt></ruby></span></p>
+            <p class="text-xl"><ruby>残<rt>のこ</rt></ruby>りのお<ruby>金<rt>かね</rt></ruby>: <span id="image-output-remaining" class="font-bold text-3xl text-green-700">3500<ruby>円<rt>えん</rt></ruby></span></p>
+        </div>
+        <p class="text-center text-xs mt-6 text-gray-500">よこはまコスモワールド アトラクションシミュレーター</p>
+    </div>
+
+
+    <div class="container mx-auto p-4 max-w-6xl relative z-10">
+        <header class="bg-white/80 backdrop-blur-md shadow-lg rounded-2xl p-4 mb-6 sticky top-4 z-20">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-center text-blue-600">
+                よこはまコスモワールド アトラクションシミュレーター
+            </h1>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+                <div id="attraction-list" class="space-y-6"></div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-4 sticky top-24">
+                    <div class="grid grid-cols-2 gap-4 text-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-lg">
+                            <p class="text-sm md:text-base text-red-800"><ruby>使<rt>つか</rt></ruby>った<ruby>合<rt>ごう</rt>計<rt>けい</rt></ruby></p>
+                            <p id="used-amount" class="text-lg md:text-2xl font-bold text-red-900">0<ruby>円<rt>えん</rt></ruby></p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-lg">
+                            <p class="text-sm md:text-base text-green-800"><ruby>残<rt>のこ</rt></ruby>りのお<ruby>金<rt>かね</rt></ruby></p>
+                            <p id="remaining-balance" class="text-lg md:text-2xl font-bold text-green-900">3500<ruby>円<rt>えん</rt></ruby></p>
+                        </div>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-center mb-3 text-purple-700"><ruby>選<rt>えら</rt></ruby>んだアトラクション</h2>
+                    <div id="selected-items-list" class="min-h-[10rem] max-h-[50vh] overflow-y-auto bg-purple-50 rounded-lg p-2 space-y-2 mb-3">
+                        <p id="empty-message" class="text-center text-gray-500 p-4">まだ何も<ruby>選<rt>えら</rt></ruby>ばれていません</p>
+                    </div>
+                    <div class="flex justify-center items-center gap-4">
+                        <button id="reset-button" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
+                            <ruby>全部<rt>ぜんぶ</rt></ruby>リセット
+                        </button>
+                        <button id="save-image-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
+                            <ruby>画像<rt>がぞう</rt></ruby>で<ruby>保存<rt>ほぞん</rt></ruby>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const attractions = [
+                { name: '大観覧車「コスモクロック21」', name_html: '<ruby>大<rt>だい</rt>観<rt>かん</rt>覧<rt>らん</rt>車<rt>しゃ</rt></ruby>「コスモクロック21」', price: 1000, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img01.jpg' },
+                { name: 'ダイビングコースター「バニッシュ！」', name_html: 'ダイビングコースター「バニッシュ！」', price: 900, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img02.jpg' },
+                { name: '急流すべり「クリフ・ドロップ」〜絶叫グランプリ〜', name_html: '<ruby>急<rt>きゅう</rt>流<rt>りゅう</rt></ruby>すべり「クリフ・ドロップ」〜<ruby>絶<rt>ぜっ</rt>叫<rt>きょう</rt></ruby>グランプリ〜', price: 800, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img03.jpg' },
+                { name: 'スピニングコースター', name_html: 'スピニングコースター', price: 700, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img04.jpg' },
+                { name: '「幽霊堂」〜鈴の鳴るほうへ〜', name_html: '「<ruby>幽<rt>ゆう</rt>霊<rt>れい</rt>堂<rt>どう</rt></ruby>」〜<ruby>鈴<rt>すず</rt></ruby>の<ruby>鳴<rt>な</rt></ruby>るほうへ〜', price: 700, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img05.jpg' },
+                { name: 'シューティングライド「エキドナの洞窟」3D', name_html: 'シューティングライド「エキドナの<ruby>洞<rt>どう</rt>窟<rt>くつ</rt></ruby>」<ruby>3D<rt>スリーディー</rt></ruby>', price: 600, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img06.jpg' },
+                { name: '「ミラーアドベンチャー」〜巨大万華鏡の世界〜', name_html: '「ミラーアドベンチャー」〜<ruby>巨<rt>きょ</rt>大<rt>だい</rt>万<rt>まん</rt>華<rt>げ</rt>鏡<rt>きょう</rt></ruby>の<ruby>世<rt>せ</rt>界<rt>かい</rt></ruby>〜', price: 500, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img07.jpg' },
+                { name: 'ゲームライド「スモッグ王国大冒険」', name_html: 'ゲームライド「スモッグ<ruby>王<rt>おう</rt>国<rt>こく</rt>大<rt>だい</rt>冒<rt>ぼう</rt>険<rt>けん</rt></ruby>」', price: 600, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img08.jpg' },
+                { name: '宝石さがし トレジャーコレクション', name_html: '<ruby>宝<rt>ほう</rt>石<rt>せき</rt></ruby>さがし トレジャーコレクション', price: 600, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img09.jpg' },
+                { name: 'オバケハンター2 ～ガシャドクロの逆襲～', name_html: 'オバケハンター2 ～ガシャドクロの<ruby>逆<rt>ぎゃく</rt>襲<rt>しゅう</rt></ruby>～', price: 700, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img10.jpg' },
+                { name: 'VRV 〜VIRTUAL REALITY VEHICLE〜', name_html: '<ruby>VRV<rt>ブイアールブイ</rt></ruby> 〜<ruby>VIRTUAL<rt>バーチャル</rt></ruby> <ruby>REALITY<rt>リアリティ</rt></ruby> <ruby>VEHICLE<rt>ビークル</rt></ruby>〜', price: 900, zone: 'ワンダーアミューズ・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img11.jpg' },
+                { name: 'カード迷路「ぐるり森大冒険」〜本物はど〜れだ！？の巻〜', name_html: 'カード<ruby>迷<rt>めい</rt>路<rt>ろ</rt></ruby>「ぐるり<ruby>森<rt>もり</rt>大<rt>だい</rt>冒<rt>ぼう</rt>険<rt>けん</rt></ruby>」〜<ruby>本<rt>ほん</rt>物<rt>もの</rt></ruby>はど〜れだ！？の<ruby>巻<rt>まき</rt></ruby>〜', price: 600, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img12.jpg' },
+                { name: 'Dr.エドガーの呪いのコレクション「恐怖の館」', name_html: '<ruby>Dr.<rt>ドクター</rt></ruby>エドガーの<ruby>呪<rt>のろ</rt></ruby>いのコレクション「<ruby>恐<rt>きょう</rt>怖<rt>ふ</rt></ruby>の<ruby>館<rt>やかた</rt></ruby>」', price: 500, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img13.jpg' },
+                { name: 'ビックリ・ふしぎ館「コスモパニック」', name_html: 'ビックリ・ふしぎ<ruby>館<rt>かん</rt></ruby>「コスモパニック」', price: 400, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img14.jpg' },
+                { name: 'アイスワールド', name_html: 'アイスワールド', price: 500, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img15.jpg' },
+                { name: 'スーパープラネット', name_html: 'スーパープラネット', price: 700, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img16.jpg' },
+                { name: 'ギャラクシー', name_html: 'ギャラクシー', price: 600, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img17.jpg' },
+                { name: 'ファミリー・バナナ・コースター', name_html: 'ファミリー・バナナ・コースター', price: 400, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img18.jpg' },
+                { name: 'ディスク・オー', name_html: 'ディスク・オー', price: 600, zone: 'ブラーノストリート・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img19.jpg' },
+                { name: 'サイクルモノレール', name_html: 'サイクルモノレール', price: 400, zone: 'キッズカーニバル・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img20.jpg' },
+                { name: 'メリーゴーランド', name_html: 'メリーゴーランド', price: 400, zone: 'キッズカーニバル・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img21.jpg' },
+                { name: 'ノースポール', name_html: 'ノースポール', price: 400, zone: 'キッズカーニバル・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img22.jpg' },
+                { name: 'オーシャン・スインガー', name_html: 'オーシャン・スインガー', price: 400, zone: 'キッズカーニバル・ゾーン', image: 'https://cosmoworld.jp/wp-content/uploads/2023/03/attraction-img23.jpg' },
+            ];
+            // ★★★ FIX: Budget changed from 2800 to 3500 ★★★
+            const totalBudget = 3500;
+            let selectedAttractions = [];
+            const attractionList = document.getElementById('attraction-list');
+            const selectedItemsList = document.getElementById('selected-items-list');
+            const usedAmountEl = document.getElementById('used-amount');
+            const remainingBalanceEl = document.getElementById('remaining-balance');
+            const resetButton = document.getElementById('reset-button');
+            const emptyMessage = document.getElementById('empty-message');
+            const saveImageButton = document.getElementById('save-image-button');
+
+            function createBackgroundIcons() {
+                const background = document.getElementById('background-wrapper');
+                if (!background) return;
+                const iconCount = 30;
+                const icons = ['<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="10"/></svg>','<svg viewBox="0 0 20 20"><rect width="20" height="20" rx="3"/></svg>','<svg viewBox="0 0 20 20"><polygon points="10,0 20,20 0,20"/></svg>','<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>','<svg viewBox="0 0 20 20"><path d="M11 9V5H9v4H5v2h4v4h2v-4h4V9h-4z"/></svg>'];
+                const colors = ['rgba(255, 192, 203, 0.6)', 'rgba(255, 228, 181, 0.6)', 'rgba(176, 224, 230, 0.7)', 'rgba(216, 191, 216, 0.6)', 'rgba(152, 251, 152, 0.6)'];
+                for (let i = 0; i < iconCount; i++) {
+                    const iconWrapper = document.createElement('div');
+                    iconWrapper.className = 'bg-icon';
+                    const size = Math.random() * 60 + 15;
+                    iconWrapper.style.width = `${size}px`;
+                    iconWrapper.style.height = `${size}px`;
+                    iconWrapper.style.left = `${Math.random() * 100}%`;
+                    const animationDuration = Math.random() * 20 + 15;
+                    iconWrapper.style.animationDuration = `${animationDuration}s`;
+                    const animationDelay = Math.random() * 15;
+                    iconWrapper.style.animationDelay = `${animationDelay}s`;
+                    iconWrapper.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                    iconWrapper.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    background.appendChild(iconWrapper);
+                }
+            }
+
+            const zones = attractions.reduce((acc, attraction) => {
+                if (!acc[attraction.zone]) acc[attraction.zone] = [];
+                acc[attraction.zone].push(attraction);
+                return acc;
+            }, {});
+
+            function renderAttractions() {
+                attractionList.innerHTML = '';
+                for (const zoneName in zones) {
+                    const zoneContainer = document.createElement('div');
+                    zoneContainer.className = 'bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-4';
+                    const zoneTitle = document.createElement('h2');
+                    zoneTitle.className = 'text-xl font-bold mb-4 text-center text-indigo-700';
+                    zoneTitle.textContent = zoneName;
+                    zoneContainer.appendChild(zoneTitle);
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+                    zones[zoneName].forEach((attraction) => {
+                        const button = document.createElement('button');
+                        button.className = 'attraction-btn flex flex-col justify-between p-4 h-32 rounded-lg shadow-md transition-all transform hover:scale-105';
+                        button.style.backgroundImage = `url(${attraction.image})`;
+                        button.dataset.name = attraction.name;
+                        const nameEl = document.createElement('div');
+                        nameEl.className = 'font-bold text-lg text-left';
+                        nameEl.innerHTML = attraction.name_html;
+                        const priceEl = document.createElement('div');
+                        priceEl.className = 'font-bold text-xl text-right';
+                        priceEl.innerHTML = `${attraction.price}<ruby>円<rt>えん</rt></ruby>`;
+                        button.appendChild(nameEl);
+                        button.appendChild(priceEl);
+                        button.addEventListener('click', () => selectAttraction(attraction));
+                        grid.appendChild(button);
+                    });
+                    zoneContainer.appendChild(grid);
+                    attractionList.appendChild(zoneContainer);
+                }
+            }
+
+            function renderSelectedList() {
+                selectedItemsList.innerHTML = '';
+                if (selectedAttractions.length === 0) {
+                    selectedItemsList.appendChild(emptyMessage);
+                    emptyMessage.style.display = 'block';
+                } else {
+                    emptyMessage.style.display = 'none';
+                    selectedAttractions.forEach((item, index) => {
+                        const listItem = document.createElement('div');
+                        listItem.className = 'flex justify-between items-center bg-white p-2 rounded-md shadow';
+                        const nameEl = document.createElement('span');
+                        nameEl.className = 'flex-grow text-sm mr-2';
+                        nameEl.innerHTML = item.name_html;
+                        const priceEl = document.createElement('span');
+                        priceEl.className = 'font-bold text-purple-800 mr-2 flex-shrink-0';
+                        priceEl.innerHTML = `${item.price}<ruby>円<rt>えん</rt></ruby>`;
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'bg-red-500 text-white w-6 h-6 rounded-full text-sm font-bold flex items-center justify-center flex-shrink-0 hover:bg-red-600 transition';
+                        removeBtn.textContent = '✕';
+                        removeBtn.addEventListener('click', () => deselectAttraction(index));
+                        listItem.appendChild(nameEl);
+                        listItem.appendChild(priceEl);
+                        listItem.appendChild(removeBtn);
+                        selectedItemsList.appendChild(listItem);
+                    });
+                }
+            }
+
+            function updateUI() {
+                const usedAmount = selectedAttractions.reduce((sum, item) => sum + item.price, 0);
+                const remainingBalance = totalBudget - usedAmount;
+                usedAmountEl.innerHTML = `${usedAmount}<ruby>円<rt>えん</rt></ruby>`;
+                remainingBalanceEl.innerHTML = `${remainingBalance}<ruby>円<rt>えん</rt></ruby>`;
+                renderSelectedList();
+                updateButtonStates(remainingBalance);
+            }
+
+            function updateButtonStates(remainingBalance) {
+                const allButtons = document.querySelectorAll('.attraction-btn');
+                allButtons.forEach(button => {
+                    const attractionName = button.dataset.name;
+                    const attraction = attractions.find(a => a.name === attractionName);
+                    if (attraction) {
+                        button.disabled = attraction.price > remainingBalance;
+                        button.classList.toggle('opacity-50', button.disabled);
+                        button.classList.toggle('cursor-not-allowed', button.disabled);
+                    }
+                });
+                saveImageButton.disabled = selectedAttractions.length === 0;
+                saveImageButton.classList.toggle('opacity-50', saveImageButton.disabled);
+                saveImageButton.classList.toggle('cursor-not-allowed', saveImageButton.disabled);
+            }
+
+            function selectAttraction(attraction) {
+                selectedAttractions.push(attraction);
+                updateUI();
+            }
+
+            function deselectAttraction(index) {
+                selectedAttractions.splice(index, 1);
+                updateUI();
+            }
+
+            resetButton.addEventListener('click', () => {
+                selectedAttractions = [];
+                updateUI();
+            });
+
+            async function saveAsImage() {
+                if (selectedAttractions.length === 0) return;
+
+                const originalButtonText = saveImageButton.innerHTML;
+                saveImageButton.innerHTML = '作成中...';
+                saveImageButton.disabled = true;
+
+                const outputArea = document.getElementById('image-output-area');
+                const grid = document.getElementById('image-output-grid');
+                const usedEl = document.getElementById('image-output-used');
+                const remainingEl = document.getElementById('image-output-remaining');
+                
+                grid.innerHTML = ''; // クリア
+
+                selectedAttractions.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg p-2 shadow-md flex flex-col';
+                    
+                    const img = document.createElement('img');
+                    img.crossOrigin = "anonymous"; // CORSエラー対策
+                    img.src = item.image;
+                    img.className = 'w-full h-32 object-cover rounded-md mb-2';
+                    
+                    const name = document.createElement('h3');
+                    name.className = 'font-bold text-base flex-grow';
+                    name.textContent = item.name;
+                    
+                    const price = document.createElement('p');
+                    price.className = 'text-right font-bold text-lg text-purple-700';
+                    price.textContent = `${item.price}円`;
+                    
+                    card.appendChild(img);
+                    card.appendChild(name);
+                    card.appendChild(price);
+                    grid.appendChild(card);
+                });
+
+                const usedAmount = selectedAttractions.reduce((sum, item) => sum + item.price, 0);
+                const remainingBalance = totalBudget - usedAmount;
+                usedEl.innerHTML = `${usedAmount}<ruby>円<rt>えん</rt></ruby>`;
+                remainingEl.innerHTML = `${remainingBalance}<ruby>円<rt>えん</rt></ruby>`;
+
+                try {
+                    const canvas = await html2canvas(outputArea, { useCORS: true, scale: 2 });
+                    const imageURL = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = imageURL;
+                    link.download = 'cosmoworld_plan.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (error) {
+                    console.error('画像の生成に失敗しました:', error);
+                    alert('画像の生成に失敗しました。もう一度お試しください。');
+                } finally {
+                    saveImageButton.innerHTML = originalButtonText;
+                    updateUI(); // ボタンの状態を元に戻す
+                }
+            }
+
+            saveImageButton.addEventListener('click', saveAsImage);
+
+            createBackgroundIcons();
+            renderAttractions();
+            updateUI();
+        });
+    </script>
+</body>
+</html>
