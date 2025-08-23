@@ -81,17 +81,16 @@
     <!-- 画像生成用の非表示エリア -->
     <div id="image-output-area" class="fixed top-0 left-[-9999px] bg-sky-100 p-8 w-[800px] text-gray-800">
         <div class="text-center border-b-2 border-blue-300 pb-4 mb-4">
-            <h2 class="text-4xl font-extrabold text-blue-700">わたしの修学旅行</ruby>プラン</h2>
+            <h2 class="text-4xl font-extrabold text-blue-700">わたしの<ruby>修学<rt>しゅうがく</rt>旅行<rt>りょこう</rt></ruby>プラン</h2>
             <p class="text-lg text-blue-600">in よこはまコスモワールド</p>
         </div>
-        <!-- 名前表示エリア -->
+        <!-- グループ名表示エリア -->
         <div id="image-output-names" class="text-center mb-6 text-xl font-bold text-gray-700">
-            <!-- JSで名前とグループ名がここに追加されます -->
+            <!-- JSでグループ名がここに追加されます -->
         </div>
         <div id="image-output-grid" class="grid grid-cols-3 gap-4 mb-6">
             <!-- 画像保存用のアトラクションカードはJSでここに追加されます -->
         </div>
-        <!-- 合計金額の表示を削除 -->
         <p class="text-center text-xs mt-6 text-gray-500">よこはまコスモワールド アトラクションシミュレーター</p>
     </div>
 
@@ -109,42 +108,43 @@
             </div>
 
             <div class="lg:col-span-1">
-                <div class="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-4 sticky top-24">
-                    <div class="grid grid-cols-2 gap-4 text-center mb-4">
-                        <div class="bg-red-100 p-3 rounded-lg">
-                            <p class="text-sm md:text-base text-red-800"><ruby>使<rt>つか</rt></ruby>った<ruby>合<rt>ごう</rt>計<rt>けい</rt></ruby></p>
-                            <p id="used-amount" class="text-lg md:text-2xl font-bold text-red-900">0<ruby>円<rt>えん</rt></ruby></p>
+                <div class="bg-white/90 backdrop-blur-sm shadow-lg rounded-2xl p-4 sticky top-24 flex flex-col" style="max-height: calc(100vh - 8rem);">
+                    <!-- 上部の固定部分 -->
+                    <div>
+                        <div class="grid grid-cols-2 gap-4 text-center mb-4">
+                            <div class="bg-red-100 p-3 rounded-lg">
+                                <p class="text-sm md:text-base text-red-800"><ruby>使<rt>つか</rt></ruby>った<ruby>合<rt>ごう</rt>計<rt>けい</rt></ruby></p>
+                                <p id="used-amount" class="text-lg md:text-2xl font-bold text-red-900">0<ruby>円<rt>えん</rt></ruby></p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-lg">
+                                <p class="text-sm md:text-base text-green-800"><ruby>残<rt>のこ</rt></ruby>りのお<ruby>金<rt>かね</rt></ruby></p>
+                                <p id="remaining-balance" class="text-lg md:text-2xl font-bold text-green-900">3500<ruby>円<rt>えん</rt></ruby></p>
+                            </div>
                         </div>
-                        <div class="bg-green-100 p-3 rounded-lg">
-                            <p class="text-sm md:text-base text-green-800"><ruby>残<rt>のこ</rt></ruby>りのお<ruby>金<rt>かね</rt></ruby></p>
-                            <p id="remaining-balance" class="text-lg md:text-2xl font-bold text-green-900">3500<ruby>円<rt>えん</rt></ruby></p>
-                        </div>
+                        <h2 class="text-xl font-bold text-center mb-3 text-purple-700"><ruby>選<rt>えら</rt></ruby>んだアトラクション</h2>
                     </div>
 
-                    <h2 class="text-xl font-bold text-center mb-3 text-purple-700"><ruby>選<rt>えら</rt></ruby>んだアトラクション</h2>
-                    <div id="selected-items-list" class="min-h-[10rem] max-h-[40vh] overflow-y-auto bg-purple-50 rounded-lg p-2 space-y-2 mb-4">
+                    <!-- 中央のスクロール可能部分 -->
+                    <div id="selected-items-list" class="flex-grow min-h-[5rem] overflow-y-auto bg-purple-50 rounded-lg p-2 space-y-2 mb-4">
                         <p id="empty-message" class="text-center text-gray-500 p-4">まだ<ruby>何<rt>なに</rt></ruby>も<ruby>選<rt>えら</rt></ruby>ばれていません</p>
                     </div>
 
-                    <!-- 名前入力フォーム -->
-                    <div class="space-y-3 mb-4">
-                        <div>
+                    <!-- 下部の固定部分 -->
+                    <div>
+                        <!-- グループ名入力フォーム -->
+                        <div class="mb-4">
                             <label for="group-input" class="block text-sm font-medium text-gray-700"><ruby>グループ<rt>ぐるーぷ</rt>名<rt>めい</rt></ruby></label>
                             <input type="text" id="group-input" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="例：1はん">
                         </div>
-                        <div>
-                            <label for="name-input" class="block text-sm font-medium text-gray-700"><ruby>名前<rt>なまえ</rt></ruby></label>
-                            <input type="text" id="name-input" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="例：よこはま たろう">
-                        </div>
-                    </div>
 
-                    <div class="flex justify-center items-center gap-4">
-                        <button id="reset-button" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
-                            <ruby>全部<rt>ぜんぶ</rt></ruby>リセット
-                        </button>
-                        <button id="save-image-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
-                            <ruby>画像<rt>がぞう</rt></ruby>で<ruby>保存<rt>ほぞん</rt></ruby>
-                        </button>
+                        <div class="flex justify-center items-center gap-4">
+                            <button id="reset-button" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
+                                <ruby>全部<rt>ぜんぶ</rt></ruby>リセット
+                            </button>
+                            <button id="save-image-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
+                                <ruby>画像<rt>がぞう</rt></ruby>で<ruby>保存<rt>ほぞん</rt></ruby>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,7 +154,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const attractions = [
-                // アトラクションデータは変更なし
+                // アトラクションデータ
                 { name: '大観覧車「コスモクロック21」', name_html: '<ruby>大<rt>だい</rt>観<rt>かん</rt>覧<rt>らん</rt>車<rt>しゃ</rt></ruby>「コスモクロック21」', price: 1000, zone: 'ワンダーアミューズ・ゾーン', image: 'https://y-sensei-lab.github.io/cosmoworld/attraction-list/cosmoclock21.jpg' },
                 { name: 'ダイビングコースター「バニッシュ！」', name_html: 'ダイビングコースター「バニッシュ！」', price: 900, zone: 'ワンダーアミューズ・ゾーン', image: 'https://y-sensei-lab.github.io/cosmoworld/attraction-list/vanish.jpg' },
                 { name: '急流すべり「クリフ・ドロップ」〜絶叫グランプリ〜', name_html: '<ruby>急<rt>きゅう</rt>流<rt>りゅう</rt></ruby>すべり「クリフ・ドロップ」〜<ruby>絶<rt>ぜっ</rt>叫<rt>きょう</rt></ruby>グランプリ〜', price: 800, zone: 'ワンダーアミューズ・ゾーン', image: 'https://y-sensei-lab.github.io/cosmoworld/attraction-list/cliffdrop.jpg' },
@@ -189,7 +189,6 @@
             const resetButton = document.getElementById('reset-button');
             const emptyMessage = document.getElementById('empty-message');
             const saveImageButton = document.getElementById('save-image-button');
-            const nameInput = document.getElementById('name-input');
             const groupInput = document.getElementById('group-input');
 
             function createBackgroundIcons() {
@@ -234,19 +233,16 @@
                     grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
                     zones[zoneName].forEach((attraction) => {
                         const button = document.createElement('button');
-                        // *** 変更点 1: ボタンの高さをh-32からh-36に増やし、レイアウト制御のためにjustify-betweenを削除 ***
-                        button.className = 'attraction-btn flex flex-col p-4 h-36 rounded-lg shadow-md transition-all transform hover:scale-105';
+                        button.className = 'attraction-btn flex flex-col p-4 h-40 rounded-lg shadow-md transition-all transform hover:scale-105';
                         button.style.backgroundImage = `url(${attraction.image})`;
                         button.dataset.name = attraction.name;
                         
                         const nameEl = document.createElement('div');
-                        // *** 変更点 2: アトラクション名にflex-growを追加し、利用可能なスペースを埋めるように設定 ***
-                        nameEl.className = 'font-bold text-lg text-left flex-grow';
+                        nameEl.className = 'font-bold text-lg text-left flex-grow w-full';
                         nameEl.innerHTML = attraction.name_html;
                         
                         const priceEl = document.createElement('div');
-                        // *** 変更点 3: 料金はそのまま。flex-growを持つ要素が上にあるため、自動的に下部に配置される ***
-                        priceEl.className = 'font-bold text-xl text-right';
+                        priceEl.className = 'font-bold text-xl text-right w-full';
                         priceEl.innerHTML = `${attraction.price}<ruby>円<rt>えん</rt></ruby>`;
                         
                         button.appendChild(nameEl);
@@ -324,7 +320,6 @@
 
             resetButton.addEventListener('click', () => {
                 selectedAttractions = [];
-                nameInput.value = '';
                 groupInput.value = '';
                 updateUI();
             });
@@ -340,13 +335,9 @@
                 const grid = document.getElementById('image-output-grid');
                 const namesEl = document.getElementById('image-output-names');
                 
-                // 名前とグループ名を設定
+                // グループ名を設定
                 const groupName = groupInput.value.trim();
-                const personName = nameInput.value.trim();
-                let nameHtml = '';
-                if(groupName) nameHtml += `<span class="mr-4">${groupName}</span>`;
-                if(personName) nameHtml += `<span>${personName}</span>`;
-                namesEl.innerHTML = nameHtml;
+                namesEl.innerHTML = groupName ? `<span>${groupName}</span>` : '';
 
                 grid.innerHTML = ''; // クリア
 
@@ -385,7 +376,7 @@
                     const canvas = await html2canvas(outputArea, { useCORS: true, scale: 2 });
                     const imageURL = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
-                    const fileName = personName ? `${personName}_plan.png` : 'cosmoworld_plan.png';
+                    const fileName = groupName ? `${groupName}_plan.png` : 'cosmoworld_plan.png';
                     link.href = imageURL;
                     link.download = fileName;
                     document.body.appendChild(link);
@@ -393,7 +384,7 @@
                     document.body.removeChild(link);
                 } catch (error) {
                     console.error('画像の生成に失敗しました:', error);
-                    alert('画像の生成に失敗しました。もう一度お試しください。');
+                    // alertの代わりにカスタムUIを出すのが望ましいが、ここではconsole.errorに留める
                 } finally {
                     saveImageButton.innerHTML = originalButtonText;
                     updateUI(); // ボタンの状態を元に戻す
