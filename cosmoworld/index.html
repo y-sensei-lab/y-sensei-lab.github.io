@@ -234,15 +234,21 @@
                     grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
                     zones[zoneName].forEach((attraction) => {
                         const button = document.createElement('button');
-                        button.className = 'attraction-btn flex flex-col justify-between p-4 h-32 rounded-lg shadow-md transition-all transform hover:scale-105';
+                        // *** 変更点 1: ボタンの高さをh-32からh-36に増やし、レイアウト制御のためにjustify-betweenを削除 ***
+                        button.className = 'attraction-btn flex flex-col p-4 h-36 rounded-lg shadow-md transition-all transform hover:scale-105';
                         button.style.backgroundImage = `url(${attraction.image})`;
                         button.dataset.name = attraction.name;
+                        
                         const nameEl = document.createElement('div');
-                        nameEl.className = 'font-bold text-lg text-left';
+                        // *** 変更点 2: アトラクション名にflex-growを追加し、利用可能なスペースを埋めるように設定 ***
+                        nameEl.className = 'font-bold text-lg text-left flex-grow';
                         nameEl.innerHTML = attraction.name_html;
+                        
                         const priceEl = document.createElement('div');
+                        // *** 変更点 3: 料金はそのまま。flex-growを持つ要素が上にあるため、自動的に下部に配置される ***
                         priceEl.className = 'font-bold text-xl text-right';
                         priceEl.innerHTML = `${attraction.price}<ruby>円<rt>えん</rt></ruby>`;
+                        
                         button.appendChild(nameEl);
                         button.appendChild(priceEl);
                         button.addEventListener('click', () => selectAttraction(attraction));
