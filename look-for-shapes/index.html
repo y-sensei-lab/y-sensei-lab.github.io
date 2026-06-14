@@ -30,10 +30,12 @@
         #camera {
             object-fit: cover; /* 画面いっぱいに広げる */
             z-index: 1;
+            /* インカメラ時はJSで transform: scaleX(-1); を付与して鏡像にする */
         }
         #overlay {
             z-index: 2;
-            pointer-events: none; /* 透かしCanvasはタッチイベントを無視する */
+            pointer-events: auto; /* お絵かきのためにタッチイベントを有効化 */
+            touch-action: none; /* なぞっている時に画面がスクロールしないようにする */
         }
 
         /* === UIコンテナ === */
@@ -44,10 +46,10 @@
             width: 100vw;
             height: 100vh;
             z-index: 10;
-            pointer-events: none; /* UIの隙間から画面タッチができるように */
+            pointer-events: none; /* UIの隙間から画面(Canvas)をタッチできるように */
             display: flex;
-            flex-direction: row; /* 左と右に分ける */
-            justify-content: space-between;
+            flex-direction: row;
+            justify-content: flex-end; /* 右側(シャッターなど)だけflexで配置 */
             align-items: center; /* 縦方向の中央に配置 */
             padding: 30px 40px;
         }
@@ -56,43 +58,57 @@
             pointer-events: auto;
         }
 
-        /* === 左側：図形選択ボタン === */
-        #shape-selectors {
+        /* === 左上のコントロール群（かきなおす ＆ 半月スライダー） === */
+        #top-left-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             display: flex;
-            flex-direction: column; /* 縦に並べる */
-            gap: 20px;
+            flex-direction: column; /* 縦並びに変更 */
+            align-items: flex-start; /* 左寄せに配置 */
+            gap: 15px; /* ボタンとスライダーの隙間 */
+            z-index: 20;
+            pointer-events: none; /* コンテナ自体はタッチをスルー */
         }
-        .shape-btn {
-            background-color: rgba(255, 255, 255, 0.85);
-            border: 3px solid transparent;
-            border-radius: 16px;
-            padding: 12px 20px;
-            font-size: 22px;
+        #top-left-controls > * {
+            pointer-events: auto; /* 中身の要素はタッチ有効 */
+        }
+
+        /* === 上部ボタンの共通スタイル === */
+        .top-btn {
+            background-color: rgba(255, 255, 255, 0.7); /* 少し透明度を上げて控えめに */
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 16px;
             font-weight: bold;
-            color: #333;
+            color: #555;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            gap: 12px;
+            gap: 8px;
             transition: all 0.2s;
             backdrop-filter: blur(4px);
-            min-width: 150px; /* ボタンの幅を揃える */
         }
-        .shape-btn.active {
-            background-color: #ffeb3b; /* 選択中は黄色で目立たせる */
-            border-color: #fbc02d;
-            transform: scale(1.05);
+        .top-btn:active {
+            transform: scale(0.95);
+            background-color: #e0e0e0;
         }
-        /* 中空の図形アイコン（SVG） */
-        .shape-icon {
-            width: 24px;
-            height: 24px;
-            fill: none;
-            stroke: #333;
-            stroke-width: 2.5;
+        .action-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
             display: block;
+        }
+        
+        /* カメラきりかえボタン（右上） */
+        #switch-camera-btn { 
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            pointer-events: auto;
+            z-index: 20;
         }
 
         /* === 右側：コントロール領域 === */
@@ -100,12 +116,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;
+            gap: 20px;
         }
 
-        /* === ズームスライダー === */
+        /* === ズームスライダーコンテナ === */
         #zoom-container {
-            display: none; /* 初期は非表示、カメラが対応していれば表示 */
+            display: none;
             align-items: center;
             gap: 10px;
             background-color: rgba(0, 0, 0, 0.4);
@@ -113,32 +129,54 @@
             border-radius: 30px;
             backdrop-filter: blur(4px);
         }
-        .zoom-label {
-            color: white;
-            font-size: 20px;
+        .slider-label { color: white; font-size: 20px; }
+        
+        /* === 透明度(半月)スライダーコンテナ（左上に配置） === */
+        #alpha-container {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.7); /* 隣のボタンとデザインを合わせる */
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
         }
-        #zoom-slider {
+
+        /* === スライダーの基本設定 === */
+        .custom-slider {
             -webkit-appearance: none;
-            width: 120px;
-            height: 6px;
+            width: 100px; height: 6px;
             background: rgba(255, 255, 255, 0.5);
-            border-radius: 3px;
-            outline: none;
+            border-radius: 3px; outline: none;
         }
+        #alpha-slider {
+            background: rgba(0, 0, 0, 0.2); /* 明るい背景で見やすいように暗めのレールにする */
+        }
+
+        /* 普通のズームスライダーのつまみ */
         #zoom-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 28px;
-            height: 28px;
-            background: white;
+            width: 28px; height: 28px;
+            background: white; border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            cursor: pointer;
+        }
+
+        /* 透明度(半月)スライダーのつまみ */
+        #alpha-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px; height: 28px;
             border-radius: 50%;
+            /* CSSグラデーションで「半月」を表現（左が白、右がダークグレー） */
+            background: linear-gradient(to right, white 50%, #444 50%);
+            border: 2px solid white; /* 半月をくっきりさせるためのフチドリ */
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
             cursor: pointer;
         }
 
         /* === シャッターボタン === */
         #shutter-btn {
-            width: 90px;
-            height: 90px;
+            width: 90px; height: 90px;
             border-radius: 50%;
             background-color: white;
             border: 6px solid #e0e0e0;
@@ -146,6 +184,7 @@
             cursor: pointer;
             transition: transform 0.1s;
             position: relative;
+            margin-top: 10px; /* スライダーとの距離を少し取る */
         }
         #shutter-btn:active {
             transform: scale(0.9);
@@ -154,30 +193,48 @@
         #shutter-btn::after {
             content: 'とる';
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 18px;
-            font-weight: bold;
-            color: #666;
+            font-size: 18px; font-weight: bold; color: #666;
         }
 
         /* === 撮影フラッシュエフェクト === */
         #flash {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
             background-color: white;
-            z-index: 100;
-            opacity: 0;
+            z-index: 100; opacity: 0;
             pointer-events: none;
             transition: opacity 0.5s ease-out;
         }
-        #flash.active {
-            opacity: 1;
-            transition: none;
+        #flash.active { opacity: 1; transition: none; }
+
+        /* === プレビューモーダル（保存用） === */
+        #preview-modal {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 300; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        #preview-modal.active { display: flex; }
+        #preview-image {
+            max-width: 90%; max-height: 70vh;
+            border: 4px solid white; border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .instruction-text {
+            color: white; font-size: 20px; font-weight: bold;
+            margin-top: 20px; text-align: center; line-height: 1.4;
+        }
+        #close-preview-btn {
+            margin-top: 20px; padding: 10px 30px;
+            font-size: 18px; font-weight: bold;
+            background-color: #f44336; color: white;
+            border: none; border-radius: 20px; cursor: pointer;
         }
 
         /* エラーメッセージ用 */
@@ -186,59 +243,72 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 200;
-            display: none;
+            padding: 20px; border-radius: 10px;
+            text-align: center; z-index: 200; display: none;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <!-- カメラ映像（インライン再生必須） -->
+    <!-- カメラ映像 -->
     <video id="camera" autoplay playsinline muted></video>
     
-    <!-- 透かしを描画するCanvas -->
+    <!-- 透かし・お絵かき用Canvas -->
     <canvas id="overlay"></canvas>
 
     <!-- UI -->
     <div id="ui-container">
         
-        <!-- 左側：図形切り替え -->
-        <div id="shape-selectors">
-            <button class="shape-btn active" data-shape="circle">
-                <!-- SVGによる中空の「まる」 -->
-                <svg class="shape-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-                まる
+        <!-- 左上：かきなおす ＆ 透明度スライダー -->
+        <div id="top-left-controls">
+            <!-- やりなおしボタン -->
+            <button id="reset-shape-btn" class="top-btn">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+                かきなおす
             </button>
-            <button class="shape-btn" data-shape="square">
-                <!-- SVGによる中空の「しかく」 -->
-                <svg class="shape-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
-                しかく
-            </button>
-            <button class="shape-btn" data-shape="triangle">
-                <!-- SVGによる中空の「さんかく」 -->
-                <svg class="shape-icon" viewBox="0 0 24 24"><polygon points="12,3 3,20 21,20" stroke-linejoin="round"/></svg>
-                さんかく
-            </button>
+
+            <!-- 透明度スライダー（つまみが半月） -->
+            <div id="alpha-container">
+                <input type="range" id="alpha-slider" class="custom-slider" min="0" max="1" step="0.1" value="0.5">
+            </div>
         </div>
+
+        <!-- カメラ切り替えボタン（右上） -->
+        <button id="switch-camera-btn" class="top-btn">
+            <svg class="action-icon" viewBox="0 0 24 24">
+                <!-- カメラをぐるっと回すようなアイコン -->
+                <path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5V13H9v2.5L5.5 12 9 8.5V11h6V8.5l3.5 3.5-3.5 3.5z"/>
+            </svg>
+            カメラ
+        </button>
 
         <!-- 右側：ズームとシャッター -->
         <div id="right-controls">
+            <!-- ズームスライダー -->
             <div id="zoom-container">
-                <span class="zoom-label">🔍</span>
-                <input type="range" id="zoom-slider" min="1" max="3" step="0.1" value="1">
+                <span class="slider-label">🔍</span>
+                <input type="range" id="zoom-slider" class="custom-slider" min="1" max="3" step="0.1" value="1">
             </div>
-            
+
+            <!-- シャッター -->
             <button id="shutter-btn"></button>
         </div>
-
     </div>
 
-    <!-- 撮影時のフラッシュ演出 -->
+    <!-- フラッシュ -->
     <div id="flash"></div>
+
+    <!-- プレビューモーダル -->
+    <div id="preview-modal">
+        <img id="preview-image" src="" alt="撮影した写真">
+        <div class="instruction-text">
+            しゃしんを ながおし して<br>「写真に追加」をえらんでね！
+        </div>
+        <button id="close-preview-btn">もどる</button>
+    </div>
 
     <!-- エラー表示用 -->
     <div id="error-message"></div>
@@ -247,116 +317,199 @@
         const video = document.getElementById('camera');
         const overlayCanvas = document.getElementById('overlay');
         const ctx = overlayCanvas.getContext('2d');
-        const shapeBtns = document.querySelectorAll('.shape-btn');
+        const resetBtn = document.getElementById('reset-shape-btn');
+        const switchCameraBtn = document.getElementById('switch-camera-btn');
         const shutterBtn = document.getElementById('shutter-btn');
         const zoomContainer = document.getElementById('zoom-container');
         const zoomSlider = document.getElementById('zoom-slider');
+        const alphaSlider = document.getElementById('alpha-slider');
         const flash = document.getElementById('flash');
         const errorMsg = document.getElementById('error-message');
+        const previewModal = document.getElementById('preview-modal');
+        const previewImage = document.getElementById('preview-image');
+        const closePreviewBtn = document.getElementById('close-preview-btn');
 
-        let currentShape = 'circle';
         let mediaStreamTrack = null;
-        
-        // 高解像度ディスプレイ（Retina等）でも綺麗に描画・保存するための倍率
+        let currentStream = null;
         const DPR = window.devicePixelRatio || 1;
 
+        // アプリの状態管理
+        let isDrawing = false;
+        let points = []; 
+        let currentFacingMode = 'environment'; // 初期は背面カメラ
+        let overlayAlpha = 0.5; // 背景の初期透明度
+
         // ==========================================
-        // 1. 透かし（オーバーレイ）の描画処理
+        // 1. お絵かき・透かしの描画処理
         // ==========================================
+        
         function drawOverlay() {
             const w = window.innerWidth;
             const h = window.innerHeight;
             
-            // Canvasの実サイズを高解像度に合わせて設定
             overlayCanvas.width = w * DPR;
             overlayCanvas.height = h * DPR;
-            
-            // 以降の描画座標をCSSピクセル基準に合わせる
             ctx.scale(DPR, DPR);
 
-            // 1. 画面全体を黒半透明(50%)で塗りつぶす
+            // 背景を現在の透明度(overlayAlpha)で塗りつぶす
             ctx.clearRect(0, 0, w, h);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillStyle = `rgba(0, 0, 0, ${overlayAlpha})`;
             ctx.fillRect(0, 0, w, h);
 
-            // 2. 図形部分を「透明にくり抜く」設定にする
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.fillStyle = '#fff';
-            
-            // 画面の中央座標と、基準となるサイズ（画面の短辺）を計算
-            const cx = w / 2;
-            const cy = h / 2;
-            const minSize = Math.min(w, h);
-            
-            ctx.beginPath();
-            if (currentShape === 'circle') {
-                const radius = minSize * 0.35; // 半径
-                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-            } else if (currentShape === 'square') {
-                const size = minSize * 0.6; // 一辺の長さ
-                ctx.rect(cx - size / 2, cy - size / 2, size, size);
-            } else if (currentShape === 'triangle') {
-                const height = minSize * 0.65; // 高さを丸と四角の間に設定
-                const size = height * 2 / Math.sqrt(3); // 正三角形の底辺の長さ
-                // バウンディングボックス（図形全体を囲む四角）の中心を画面中央に配置
-                ctx.moveTo(cx, cy - height / 2); // 上の頂点
-                ctx.lineTo(cx + size / 2, cy + height / 2); // 右下の頂点
-                ctx.lineTo(cx - size / 2, cy + height / 2); // 左下の頂点
+            if (points.length > 2) {
+                // 描かれた形がある場合、透明にくり抜く
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = '#fff';
+                
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
                 ctx.closePath();
-            }
-            ctx.fill();
+                ctx.fill();
 
-            // 3. 描画モードを元に戻し、くり抜いた枠に白い破線を描いてわかりやすくする
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 4;
-            ctx.setLineDash([12, 12]);
-            ctx.stroke();
+                // くり抜いた枠に白い破線を描く
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0.3, overlayAlpha + 0.2)})`; // 背景が薄い時は線も少し薄く
+                ctx.lineWidth = 4;
+                ctx.setLineDash([12, 12]);
+                ctx.stroke();
+            } else {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = 'white';
+                ctx.font = "bold 28px 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', 'Arial Rounded MT Bold', sans-serif";
+                ctx.textAlign = 'center';
+                
+                // 背景が完全に透明(0)に近い場合は、文字が見えやすいように影をつける
+                if (overlayAlpha < 0.3) {
+                    ctx.shadowColor = "black";
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 2;
+                    ctx.shadowOffsetY = 2;
+                }
+                ctx.fillText('がめん を なぞって', w / 2, h / 2 - 20);
+                ctx.fillText('かたち を つくろう！', w / 2, h / 2 + 25);
+                ctx.shadowColor = "transparent"; // 影をリセット
+            }
         }
 
-        // 図形ボタンの切り替えイベント
-        shapeBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                shapeBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentShape = btn.dataset.shape;
+        // なぞっている最中の状態
+        function drawDrawingState() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            
+            overlayCanvas.width = w * DPR;
+            overlayCanvas.height = h * DPR;
+            ctx.scale(DPR, DPR);
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = `rgba(0, 0, 0, ${overlayAlpha})`;
+            ctx.fillRect(0, 0, w, h);
+
+            if (points.length > 0) {
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.setLineDash([]);
+
+                // 背景が明るい場合は線が見えやすいように影をつける
+                if (overlayAlpha < 0.3) {
+                    ctx.shadowColor = "black";
+                    ctx.shadowBlur = 4;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.stroke();
+                ctx.shadowColor = "transparent";
+            }
+        }
+
+        // 透明度スライダーの操作
+        alphaSlider.addEventListener('input', (e) => {
+            overlayAlpha = parseFloat(e.target.value);
+            if (isDrawing) {
+                drawDrawingState();
+            } else {
                 drawOverlay();
-            });
+            }
         });
 
-        // 画面リサイズ・回転時に再描画
+        // ==========================================
+        // 2. タッチイベント
+        // ==========================================
+        overlayCanvas.addEventListener('pointerdown', (e) => {
+            isDrawing = true;
+            points = [{ x: e.clientX, y: e.clientY }];
+            drawDrawingState();
+        });
+        overlayCanvas.addEventListener('pointermove', (e) => {
+            if (!isDrawing) return;
+            points.push({ x: e.clientX, y: e.clientY });
+            drawDrawingState();
+        });
+        overlayCanvas.addEventListener('pointerup', () => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            drawOverlay();
+        });
+        overlayCanvas.addEventListener('pointercancel', () => {
+            if (!isDrawing) return;
+            isDrawing = false;
+            drawOverlay();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            points = [];
+            drawOverlay();
+        });
+
         window.addEventListener('resize', drawOverlay);
 
         // ==========================================
-        // 2. カメラの起動とズーム制御
+        // 3. カメラ起動と切り替え
         // ==========================================
-        async function startCamera() {
+        async function startCamera(facingMode) {
+            // 既にカメラが動いていれば止める
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment', // 背面カメラ
-                        width: { ideal: 1920 },    // 高画質を要求
-                        height: { ideal: 1080 }
-                    },
+                    video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1080 } },
                     audio: false
                 });
-                
                 video.srcObject = stream;
+                currentStream = stream;
                 
-                // カメラの設定を取得してズーム可能か判定
+                // インカメラの場合は鏡像表示にする
+                if (facingMode === 'user') {
+                    video.style.transform = 'scaleX(-1)';
+                } else {
+                    video.style.transform = 'none';
+                }
+                
                 mediaStreamTrack = stream.getVideoTracks()[0];
                 const capabilities = mediaStreamTrack.getCapabilities();
                 const settings = mediaStreamTrack.getSettings();
 
-                // ズーム機能に対応している場合のみスライダーを表示
+                // ズーム機能の表示切り替え（インカメラ等非対応時は隠す）
                 if (capabilities.zoom) {
                     zoomSlider.min = capabilities.zoom.min;
                     zoomSlider.max = capabilities.zoom.max;
                     zoomSlider.step = capabilities.zoom.step;
                     zoomSlider.value = settings.zoom || capabilities.zoom.min;
                     zoomContainer.style.display = 'flex';
+                } else {
+                    zoomContainer.style.display = 'none';
                 }
-
             } catch (err) {
                 console.error("Camera access error:", err);
                 errorMsg.style.display = 'block';
@@ -364,24 +517,27 @@
             }
         }
 
-        // ズームスライダーのイベント
+        // カメラ切り替えボタンのイベント
+        switchCameraBtn.addEventListener('click', () => {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            startCamera(currentFacingMode);
+        });
+
         zoomSlider.addEventListener('input', (e) => {
             if (mediaStreamTrack) {
                 mediaStreamTrack.applyConstraints({
                     advanced: [{ zoom: parseFloat(e.target.value) }]
-                }).catch(err => console.error("Zoom is not supported", err));
+                }).catch(err => console.error("Zoom not supported", err));
             }
         });
 
         // ==========================================
-        // 3. 撮影と画像の保存 (合成処理)
+        // 4. 撮影処理
         // ==========================================
         function takePhoto() {
-            // シャッターエフェクト
             flash.classList.add('active');
             setTimeout(() => flash.classList.remove('active'), 50);
 
-            // 撮影・合成用の一時的なCanvasを作成（高解像度）
             const captureCanvas = document.createElement('canvas');
             const capCtx = captureCanvas.getContext('2d');
             
@@ -390,57 +546,49 @@
             captureCanvas.width = w;
             captureCanvas.height = h;
 
-            // ① カメラ映像の描画
-            // CSSの object-fit: cover をCanvas上で再現し、画面で見えている通りに切り取る
             const vw = video.videoWidth;
             const vh = video.videoHeight;
             const vRatio = vw / vh;
             const cRatio = w / h;
 
             let drawWidth, drawHeight, startX, startY;
-
             if (cRatio > vRatio) {
-                drawWidth = w;
-                drawHeight = w / vRatio;
-                startX = 0;
-                startY = (h - drawHeight) / 2;
+                drawWidth = w; drawHeight = w / vRatio;
+                startX = 0; startY = (h - drawHeight) / 2;
             } else {
-                drawWidth = h * vRatio;
-                drawHeight = h;
-                startX = (w - drawWidth) / 2;
-                startY = 0;
+                drawWidth = h * vRatio; drawHeight = h;
+                startX = (w - drawWidth) / 2; startY = 0;
             }
 
-            // カメラ映像を描画
-            capCtx.drawImage(video, 0, 0, vw, vh, startX, startY, drawWidth, drawHeight);
+            // インカメラの時は、保存される画像も鏡像になるようにCanvasを反転して描画
+            if (currentFacingMode === 'user') {
+                capCtx.save();
+                capCtx.translate(w, 0); // 右端を基準に
+                capCtx.scale(-1, 1);    // 左右反転
+                capCtx.drawImage(video, 0, 0, vw, vh, startX, startY, drawWidth, drawHeight);
+                capCtx.restore();       // 反転を戻す
+            } else {
+                capCtx.drawImage(video, 0, 0, vw, vh, startX, startY, drawWidth, drawHeight);
+            }
 
-            // ② 透かし（黒背景＋切り抜き図形）を重ねて描画
+            // 透かしを重ねる
             capCtx.drawImage(overlayCanvas, 0, 0, w, h);
 
-            // ③ 画像として端末にダウンロード
             const dataUrl = captureCanvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            
-            // ファイル名： 探しもの_図形_日時.png
-            const shapeName = currentShape === 'circle' ? 'まる' : currentShape === 'square' ? 'しかく' : 'さんかく';
-            const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
-            a.download = `さがしもの_${shapeName}_${dateStr}.png`;
-            
-            // ダウンロード実行
-            a.click();
+            previewImage.src = dataUrl;
+            previewModal.classList.add('active');
         }
 
         shutterBtn.addEventListener('click', takePhoto);
 
-        // ==========================================
-        // 起動処理
-        // ==========================================
-        // 初期描画
-        drawOverlay();
-        // カメラ起動
-        startCamera();
+        closePreviewBtn.addEventListener('click', () => {
+            previewModal.classList.remove('active');
+            previewImage.src = '';
+        });
 
+        // 起動
+        drawOverlay();
+        startCamera(currentFacingMode);
     </script>
 </body>
 </html>
