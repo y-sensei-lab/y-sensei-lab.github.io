@@ -335,6 +335,7 @@
 
         // アプリの状態管理
         let isDrawing = false;
+        let isShapeCompleted = false; // 形がすでに完成しているかどうか
         let points = []; 
         let currentFacingMode = 'environment'; // 初期は背面カメラ
         let overlayAlpha = 0.5; // 背景の初期透明度
@@ -445,6 +446,8 @@
         // 2. タッチイベント
         // ==========================================
         overlayCanvas.addEventListener('pointerdown', (e) => {
+            if (isShapeCompleted) return; // すでに形が描かれている場合は無視する
+            
             isDrawing = true;
             points = [{ x: e.clientX, y: e.clientY }];
             drawDrawingState();
@@ -457,16 +460,32 @@
         overlayCanvas.addEventListener('pointerup', () => {
             if (!isDrawing) return;
             isDrawing = false;
+            
+            if (points.length > 2) {
+                isShapeCompleted = true; // 形が完成したマークをつける
+            } else {
+                points = []; // 短すぎる（点だけなど）場合はリセットして描き直せるようにする
+            }
+            
             drawOverlay();
         });
         overlayCanvas.addEventListener('pointercancel', () => {
             if (!isDrawing) return;
             isDrawing = false;
+            
+            if (points.length > 2) {
+                isShapeCompleted = true;
+            } else {
+                points = [];
+            }
+            
             drawOverlay();
         });
 
+        // かきなおすボタン
         resetBtn.addEventListener('click', () => {
             points = [];
+            isShapeCompleted = false; // 形の完成状態をリセット
             drawOverlay();
         });
 
